@@ -1,0 +1,211 @@
+{% extends "pos/layout.html" %}
+
+{% block title %}Userslist{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-inner">
+      <div class="page-header">
+        <h3 class="fw-bold mb-3"></h3>
+        <ul class="breadcrumbs mb-3">
+          <li class="nav-home">
+            <a href="#">
+              <i class="icon-home"></i>
+            </a>
+          </li>
+          <li class="separator">
+            <i class="icon-arrow-right"></i>
+          </li>
+          <li class="nav-item">
+            <a href="{%  url 'dashboard:dashboardpage'%}">home</a>
+          </li>
+          <li class="separator">
+            <i class="icon-arrow-right"></i>
+          </li>
+          <li class="nav-item">
+            <a href="#">add user</a>
+          </li>
+        </ul>
+      </div>
+      
+      <div class="row">
+        <div class="col-md-12">
+          <div class="card">
+            <form method="post"  id="productForm" action="{% url 'product:editproduct' product.id %}" enctype="multipart/form-data">
+            <div class="card-header">
+              <div class="card-title">Edit Product </div>
+            </div>
+           
+            <div class="card-body">
+              {% if messages %}
+              <div class="alert alert-danger  alert-dismissible fade show">
+                {% for message in messages %}
+                  <p>{{ message }}</p>
+                {% endfor %}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endif %}
+            <div class="row">
+              <div class="col-md-6">
+                  {%csrf_token%}
+                  <div class="form-group">
+                      <label for="first_name">Name <span class="text-danger">*</span> </label>
+                   {{form.name}}
+                    
+                    </div>
+                    <div class="form-group">
+                      <label for="first_name">Product Category <span class="text-danger">*</span></label>
+                      <div class="d-flex ">
+                        {{form.category}} <a class="btn btn-primary ms-1 " href="{% url 'product:addcategory'%}?next={{ request.get_full_path }}" data-toggle="tooltip" data-placement="top" title="add a new product category"><i class="fas fa-plus"></i></a>
+                      </div>
+                  
+                    
+                    </div>
+                    <div class="form-group">
+                      <label for="first_name">Description</label>
+                   {{form.description}}
+                    
+                    </div>
+              
+             
+              </div>
+              <div class="col-md-6">
+                  <div class="form-group">
+                      <label for="first_name">Unit Cost Price (GH₵)<span class="text-danger">*</span></label>
+                   {{form.unit_cost_price}}
+                    
+                    </div>
+                    <div class="form-group">
+                      <label for="first_name">Unit Selling Price (GH₵)<span class="text-danger">*</span></label>
+                   {{form.unit_selling_price}}
+                    
+                    </div>
+                    <div class="form-group">
+                      <label for="first_name">BulK Cost  Price (GH₵)<span class="text-danger">*</span></label>
+                   {{form.bulk_cost_price}}
+                    
+                    </div>
+
+                    <div class="form-group">
+                      <label for="first_name">Bulk Selling Price (GH₵)<span class="text-danger">*</span></label>
+                   {{form.bulk_selling_price}}
+                    
+                    </div>
+
+                    <div class="form-group">
+                      <label for="first_name">Available Quantity<span class="text-danger">*</span></label>
+                   {{form.available_quantity}}
+                    
+                    </div>
+
+                    <div class="form-group">
+                      <label for="first_name">Number of Units Per Bulk<span class="text-danger">*</span></label><br/>
+                      <small >{{form.units_per_bulk.help_text}}</small>
+                   {{form.units_per_bulk}}
+                    
+                    </div>
+
+                    <div class="form-group">
+                      <label for="first_name">Product Image</label>
+                   {{form.image}}
+                    
+                    </div>
+                    <div id="imagePreview" class="mt-4"></div>
+
+                   
+
+              </div>
+              
+            
+            </div>
+          </div>
+            <div class="card-action">
+              <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+        </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+   
+
+
+  </script>
+
+
+  <script>
+    // JavaScript to handle image preview and removal
+    const imageInput = document.getElementById('id_image');
+    const imagePreview = document.getElementById('imagePreview');
+    
+    // Check if the product already has an image
+    const existingImageUrl = "{% if product.image %}{{ product.image.url }}{% else %}''{% endif %}"; // Use Django template tag for existing image URL
+    console.log(existingImageUrl)
+    if (existingImageUrl.length>2) {
+        imagePreview.innerHTML = `
+            <div style="position: relative; display: inline-block; animation: fadeIn 0.5s;">
+                <img src="${existingImageUrl}" alt="Product Image" class="avatar-img rounded" style="max-width: 100%; max-height: 300px; width: auto; height: auto; border: 1px solid #ddd; padding: 5px; border-radius: 8px;">
+                <button type="button" class="btn btn-sm btn-primary" id="removeImage" style="position: absolute; top: 5px; right: 5px; color: white; border: none; cursor: pointer;">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
+
+        // Add event listener to remove button for existing image
+        const removeButton = document.getElementById('removeImage');
+        removeButton.addEventListener('click', function () {
+            imageInput.value = ''; // Clear the input
+            imagePreview.innerHTML = ''; // Remove the preview
+        });
+    }
+
+    // Handle new image selection
+    imageInput.addEventListener('change', function () {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                // Clear any previous content
+                imagePreview.innerHTML = `
+                    <div style="position: relative; display: inline-block; animation: fadeIn 0.5s;">
+                        <img src="${e.target.result}" alt="Product Image" class="avatar-img rounded" style="max-width: 100%; max-height: 300px; width: auto; height: auto; border: 1px solid #ddd; padding: 5px; border-radius: 8px;">
+                        <button type="button" class="btn btn-sm btn-primary" id="removeImage" style="position: absolute; top: 5px; right: 5px; color: white; border: none; cursor: pointer;">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+
+                // Add event listener to remove button for new image
+                const removeButton = document.getElementById('removeImage');
+                removeButton.addEventListener('click', function () {
+                    imageInput.value = ''; // Clear the input
+                    imagePreview.innerHTML = ''; // Remove the preview
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+
+     
+
+<script>
+  // JavaScript for form validation
+  (function () {
+      'use strict'
+      window.addEventListener('load', function () {
+          var form = document.getElementById('productForm')
+          form.addEventListener('submit', function (event) {
+              if (form.checkValidity() === false) {
+                  event.preventDefault()
+                  event.stopPropagation()
+              }
+              form.classList.add('was-validated')
+          }, false)
+      }, false)
+  })()
+</script>
+{% endblock %}

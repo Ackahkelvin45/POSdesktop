@@ -1,0 +1,101 @@
+{% extends "pos/layout.html" %}
+
+{% block title %}Userslist{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-inner">
+      <div class="page-header">
+        <h3 class="fw-bold mb-3"></h3>
+        <ul class="breadcrumbs mb-3">
+          <li class="nav-home">
+            <a href="#">
+              <i class="icon-home"></i>
+            </a>
+          </li>
+          <li class="separator">
+            <i class="icon-arrow-right"></i>
+          </li>
+          <li class="nav-item">
+            <a href="{%  url 'dashboard:dashboardpage'%}">home</a>
+          </li>
+          <li class="separator">
+            <i class="icon-arrow-right"></i>
+          </li>
+          <li class="nav-item">
+            <a href="#">edit user</a>
+          </li>
+        </ul>
+      </div>
+      
+      <div class="row">
+        <div class="col-md-12">
+          <div class="card">
+            <form method="post" action="{% url 'users:editusers' user.id%}">
+            <div class="card-header">
+              <div class="card-title">Edit  User</div>
+            </div>
+            <div class="card-body">
+                {% if messages %}
+                <div class="alert alert-danger">
+                  {% for message in messages %}
+                    <p>{{ message }}</p>
+                  {% endfor %}
+                </div>
+              {% endif %}
+              <div class="row">
+                <div class="col-md-6">
+                    {%csrf_token%}
+                    <div class="form-group">
+                        <label for="first_name">First Name</label>
+                     {{form.first_name}}
+                      
+                      </div>
+                      <div class="form-group">
+                        <label for="first_name">Last Name</label>
+                     {{form.last_name}}
+                      
+                      </div>
+                  <div class="form-group">
+                    <label for="email2">Email Address</label>
+                 {{form.email}}
+                  
+                  </div>
+                  <div class="form-group">
+                    <label for="email2">Role</label>
+                 {{form.role}}
+                  
+                  </div>
+               
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="password">Password</label>
+    {{form.password}}
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Comfirm Password</label>
+    {{form.confirm_password}}
+                    </div>
+      
+
+                  </div>
+              
+              </div>
+            </div>
+            <div class="card-action">
+              <button class="btn btn-primary">Save</button>
+            </div>
+        </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+
+     
+
+{% endblock %}

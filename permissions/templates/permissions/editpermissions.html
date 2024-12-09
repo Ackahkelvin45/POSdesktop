@@ -1,0 +1,90 @@
+{% extends "pos/layout.html" %}
+
+{% block title %}Userslist{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-inner">
+      <div class="page-header">
+        <h3 class="fw-bold mb-3"></h3>
+        <ul class="breadcrumbs mb-3">
+          <li class="nav-home">
+            <a href="#">
+              <i class="icon-home"></i>
+            </a>
+          </li>
+          <li class="separator">
+            <i class="icon-arrow-right"></i>
+          </li>
+          <li class="nav-item">
+            <a href="{% url 'dashboard:dashboardpage' %}">home</a>
+          </li>
+          <li class="separator">
+            <i class="icon-arrow-right"></i>
+          </li>
+          <li class="nav-item">
+            <a href="">Edit Group Permissions</a>
+          </li>
+        </ul>
+      </div>
+
+
+            
+          
+
+      <div class="row">
+        <div class="col-md-12">
+            {% if messages %}
+            <div class="mt-4">
+              {% for message in messages %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                  {{ message }}
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+          <div class="card">
+            <div class="card-header">
+              <h4 class="card-title">Edit Permissions for  {{ group.name }}</h4>
+            </div>
+            <div class="card-body">
+                
+
+                <form method="post" action="{% url 'permissions:edit_group_permissions' group.id %}">
+                    {% csrf_token %}
+                    
+                    
+                    <div class="form-check">
+                        {% for app_label in all_app_labels %}
+                            <div>
+                                <!-- Display app label (e.g., "auth", "sessions", etc.) -->
+                                <input 
+                                    type="checkbox" 
+                                    name="apps" 
+                                    value="{{ app_label }}" 
+                                    {% if app_label in group_app_labels %}checked{% endif %}>
+                                <label for="app_{{ app_label }}">{{ app_label|title }}</label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
+                </form>
+                
+                
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+     
+
+{% endblock %}

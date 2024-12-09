@@ -1,0 +1,409 @@
+{% extends "pos/layout.html" %}
+
+{% block title %}Userslist{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-inner">
+      <div class="page-header">
+        <ul class="breadcrumbs mb-3">
+          <li class="nav-home">
+            <a href="#">
+              <i class="icon-home"></i>
+            </a>
+          </li>
+          <li class="separator">
+            <i class="icon-arrow-right"></i>
+          </li>
+          <li class="nav-item">
+            <a href="{% url 'dashboard:dashboardpage' %}">home</a>
+          </li>
+          <li class="separator">
+            <i class="icon-arrow-right"></i>
+          </li>
+          <li class="nav-item">
+            <a href="">product list</a>
+          </li>
+        </ul>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+            <div class="card-body">
+                <p class="demo">
+                  {% if messages %}
+  <div class="mt-4">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+                  
+
+                  <a href="{% url 'product:addcategory'%}" class="btn btn-primary btn-sm">
+                    <span class="btn-label">
+                      <i class="fa fa-plus"></i>
+                    </span>
+                    Add Category
+                  </a>
+                  <a href="{% url 'product:addproduct'%}" class="btn btn-primary btn-sm">
+                    <span class="btn-label">
+                      <i class="fa fa-plus"></i>
+                    </span>
+                    Add Product
+                  </a>
+
+               
+
+                </p>
+              </div>
+          <div class="card">
+           
+            <div class="card-header d-flex flex-sm-row flex-column justify-content-between">
+              <h5 class="card-title">Product List</h5>
+              <div class=""> 
+                <nav class="d-flex  j">
+                  <ul class="list-unstyled d-flex flex-sm-row flex-column">
+                      <li class="menu-item">
+                        <a href="{% url 'product:exportproductexcel'%}" class="btn btn-label-success btn-round btn-sm">
+                  
+                          <span class="btn-label">
+                            <i class="fas fa-file-export"></i>
+                          </span>
+                          Export as csv
+                        </a>
+                      </li>
+                      <li class="menu-item">
+                        <a href="{% url 'product:exportproductpdf'%}" class="btn btn-label-info btn-round btn-sm">
+                  
+                          <span class="btn-label">
+                            <i class="fas fa-file-export"></i>
+                          </span>
+                          Export as pdf
+                        </a>
+                      </li>
+                     
+                      <li class="menu-item">
+                        <a  id="reset-all-btn" data-bs-toggle="modal" data-bs-target="#resetAllModal"  class="btn btn-label-warning btn-round btn-sm">
+                  
+                          <span class="btn-label">
+                            <i class="fa fas fa-sync-alt"></i>
+                          </span>
+                          Reset all
+                          
+                        </a>
+                      </li>
+                      <li class="menu-item">
+                      
+                        <a id="delete-all-btn" class="btn btn-label-danger btn-round btn-sm" data-bs-toggle="modal" data-bs-target="#deleteAllModal">
+                          <span class="btn-label">
+                              <i class="fa fa-trash-alt"></i>
+                          </span>
+                          Delete All
+                      </a>
+                      
+                      </li>
+
+                  </ul>
+              </nav>
+
+               
+
+               
+              </div>
+            </div>
+<!-- Reset all conformation modal-->
+<div class="modal fade" id="resetAllModal" tabindex="-1" aria-labelledby="resetAllModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+          <div class="modal-header bg-warning text-white">
+              <h5 class="modal-title" id="resetAllModalLabel">Confirm Delete All</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+              <p>Are you sure you want to reset all available quantity to zero? <br>
+                  <span class="text-danger">This action cannot be undone!</span>
+              </p>
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-primary btn-sm" data-bs-dismiss="modal">Cancel</button>
+              <a href="{% url 'product:reset-all' %}" class="btn btn-warning btn-sm">Reset All</a>
+          </div>
+      </div>
+  </div>
+</div>
+
+            <!-- Delete All Confirmation Modal -->
+<div class="modal fade" id="deleteAllModal" tabindex="-1" aria-labelledby="deleteAllModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+          <div class="modal-header bg-danger text-white">
+              <h5 class="modal-title" id="deleteAllModalLabel">Confirm Delete All</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+              <p>Are you sure you want to delete all products? <br>
+                  <span class="text-danger">This action cannot be undone!</span>
+              </p>
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-primary btn-sm" data-bs-dismiss="modal">Cancel</button>
+              <a href="{% url 'product:delete-all' %}" class="btn btn-danger btn-sm">Delete All</a>
+          </div>
+      </div>
+  </div>
+</div>
+
+            <!-- Delete Confirmation Modal -->
+
+           
+            <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered">
+                  <div class="modal-content">
+                      <div class="modal-header bg-danger text-white">
+                          <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                          <p>Are you sure you want to delete <strong id="productName"></strong>?</p>
+                          <p class="text-danger">This action cannot be undone!</p>
+                      </div>
+                      <div class="modal-footer">
+                          <button type="button" class="btn btn-sm btn-primary" data-bs-dismiss="modal">Cancel</button>
+                          <button type="button" id="confirmDelete" class="btn btn-sm btn-danger">Delete</button>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          
+            
+
+            <div class="card-body">
+              <div class="table-responsive">
+                <table
+                  id="basic-datatables"
+                  class="display table table-striped table-hover"
+                >
+                  <thead>
+                    <tr>
+                        <th>Image</th>
+                      <th>Name</th>
+                      <th>Category</th>
+                      <th>Unit Selling Price (GH₵)</th>
+                      <th>Bulk Selling Price (GH₵)</th>
+                      <th>Available Quantity</th>
+                      <th>Action</th>
+
+                      
+                    </tr>
+                  </thead>
+                 
+                  <tbody>
+                    {% for product in products %}
+                    <tr>
+                        <td>
+                            {% if product.image %}
+                            <div class="avatar avatar-xl">
+                                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="avatar-img rounded">
+                            </div>
+                            {% else %}
+                            No Image Available
+                            {% endif %}
+                        </td>
+                        <td>{{ product.name }}</td>
+                        <td>{{ product.category.name }}</td>
+                        <td>{{ product.unit_selling_price }}</td>
+                        <td>{{ product.bulk_selling_price }}</td>
+                        <td>{{ product.available_quantity }}</td>
+                        <td>
+                            <div class="d-flex ">
+                                <form id="delete-form-{{ product.id }}" method="POST" action="{% url 'product:deleteproduct' product.id %}">
+                                    {% csrf_token %}
+                                </form>
+                                <a class="view-button text-info" 
+                                data-product-id="{{ product.id }}"
+                                data-product-name="{{ product.name }}"
+                                data-product-category="{{ product.category.name }}"
+
+                                data-product-description="{{ product.description }}"
+                                data-product-unit-selling-price="{{ product.unit_selling_price }}"
+                                data-product-unit-cost-price="{{ product.unit_cost_price }}"
+
+                                data-product-bulk-selling-price="{{ product.bulk_selling_price }}"
+                                data-product-bulk-cost-price="{{ product.bulk_cost_price }}"
+
+                                data-product-available-quantity="{{ product.available_quantity }}"
+                                data-product-category="{{ product.category.name }}"
+                                data-bs-toggle="modal" 
+                                data-bs-target="#viewProductModal"
+                                style="cursor: pointer;"
+                               
+                                >
+                                 <i   data-bs-toggle="tooltip" title="view details" class="fas fa-eye"></i> 
+                             </a>
+                                <a class="text-primary mx-2"  data-bs-toggle="tooltip" title="edit" href="{% url 'product:editproduct' product.id %}" style="cursor: pointer;" ><i class="fas fa-edit fas "></i> </a>
+                                <a  class="delete-button text-danger" 
+                                   data-product-id="{{ product.id }}" 
+                                   data-product-name="{{ product.name }}" 
+                                   style="cursor: pointer;" 
+                                   data-bs-toggle="modal" 
+                                   data-bs-target="#deleteModal">
+                                    <i  data-bs-toggle="tooltip" title="delete" class="fas fa-trash-alt"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center">No products available.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+
+
+  <div class="modal fade" id="viewProductModal" tabindex="-1" aria-labelledby="viewProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewProductModalLabel">Product Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="productName1" class="form-label"><strong>Name</strong></label>
+                                <input type="text" class="form-control" id="productName1" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label for="productCategory" class="form-label"><strong>Category</strong></label>
+                                <input type="text" class="form-control" id="productCategory" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label for="productDescription" class="form-label"><strong>Description</strong></label>
+                                <textarea class="form-control" id="productDescription" rows="3" readonly></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="productUnitCostPrice" class="form-label"><strong>Unit Cost Price (GH₵)</strong></label>
+                                <input type="text" class="form-control" id="productUnitCostPrice" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="productUnitSellingPrice" class="form-label"><strong>Unit Selling Price (GH₵)</strong></label>
+                                <input type="text" class="form-control" id="productUnitSellingPrice" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label for="productBulkCostPrice" class="form-label"><strong>Bulk Cost Price (GH₵)</strong></label>
+                                <input type="text" class="form-control" id="productBulkCostPrice" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label for="productBulkSellingPrice" class="form-label"><strong>Bulk Selling Price (GH₵)</strong></label>
+                                <input type="text" class="form-control" id="productBulkSellingPrice" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label for="productAvailableQuantity" class="form-label"><strong>Available Quantity</strong></label>
+                                <input type="text" class="form-control" id="productAvailableQuantity" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary btn-sm" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+  document.querySelectorAll('.view-button').forEach(button => {
+    button.addEventListener('click', function () {
+        const productId = this.getAttribute('data-product-id');
+        const productName = this.getAttribute('data-product-name');
+        const productDescription = this.getAttribute('data-product-description');
+        const productUnitSellingPrice = this.getAttribute('data-product-unit-selling-price');
+        const productUnitCostPrice = this.getAttribute('data-product-unit-cost-price');
+
+        const productBulkSellingPrice = this.getAttribute('data-product-bulk-selling-price');
+        const productBulkCostPrice = this.getAttribute('data-product-bulk-cost-price');
+        const productAvailableQuantity = this.getAttribute('data-product-available-quantity');
+        const productCategory = this.getAttribute('data-product-category');
+
+
+        document.getElementById('productName1').value = productName;
+        document.getElementById('productCategory').value = productCategory;
+        document.getElementById('productDescription').value = productDescription;
+        document.getElementById('productUnitSellingPrice').value = productUnitSellingPrice;
+        document.getElementById('productBulkSellingPrice').value = productBulkSellingPrice;
+        document.getElementById('productBulkCostPrice').value = productBulkCostPrice;
+        document.getElementById('productUnitCostPrice').value = productUnitCostPrice;
+        document.getElementById('productAvailableQuantity').value = productAvailableQuantity;
+    });
+  });
+</script>
+
+<script>
+ 
+
+    // Select all delete buttons by class name
+
+     
+
+
+
+      document.querySelectorAll('.delete-button').forEach(button => {
+        button.addEventListener('click', function () {
+            // Get product data from attributes
+            const productId = this.getAttribute('data-product-id');
+            const productName = this.getAttribute('data-product-name');
+    
+            // Update modal content
+            document.getElementById('productName').textContent = productName;
+    
+            // Set the ID of the form to submit
+            document.getElementById('confirmDelete').setAttribute('data-form-id', `delete-form-${productId}`);
+        });
+    });
+    
+    document.getElementById('confirmDelete').addEventListener('click', function () {
+        // Get the form ID from the data attribute
+        const formId = this.getAttribute('data-form-id');
+    
+        // Submit the corresponding form
+        const form = document.getElementById(formId);
+        if (form) {
+            form.submit();
+        }
+    });
+    
+  
+    
+       
+     
+      
+</script>
+
+
+
+
+
+     
+
+{% endblock %}

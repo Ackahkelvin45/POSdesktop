@@ -1,0 +1,146 @@
+{% extends "pos/layout.html" %}
+
+{% block title %}Userslist{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-inner">
+      <div class="page-header">
+        <h3 class="fw-bold mb-3"></h3>
+        <ul class="breadcrumbs mb-3">
+          <li class="nav-home">
+            <a href="#">
+              <i class="icon-home"></i>
+            </a>
+          </li>
+          <li class="separator">
+            <i class="icon-arrow-right"></i>
+          </li>
+          <li class="nav-item">
+            <a href="{%  url 'dashboard:dashboardpage'%}">home</a>
+          </li>
+          <li class="separator">
+            <i class="icon-arrow-right"></i>
+          </li>
+          <li class="nav-item">
+            <a href="#">add inventory log</a>
+          </li>
+        </ul>
+      </div>
+      
+      <div class="row">
+        <div class="col-md-12">
+          <div class="card">
+            <form method="post" action="{% url 'inventory:editinventory' inventorylog.id %}">
+            <div class="card-header">
+              <div class="card-title">Edit Inventory </div>
+            </div>
+            <div class="card-body">
+                {% if messages %}
+                <div class="alert alert-danger  alert-dismissible fade show">
+                  {% for message in messages %}
+                    <p>{{ message }}</p>
+                  {% endfor %}
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+              {% endif %}
+              <div class="row">
+                <div class="col-md-6">
+                    {%csrf_token%}
+                    <div class="form-group">
+                        <label for="first_name">Product</label>
+                        <div>
+                          {{form.product}}
+                        </div>
+                     
+                      
+                      </div>
+                      <div class="form-group">
+                        <label for="first_name">Action</label>
+                     {{form.action}}
+                      
+                      </div>
+                  
+                      <div class="form-group">
+                        <label for="current-quantity" class="form-label">Current Quantity</label>
+                        <input 
+                            type="text" 
+                            id="current-quantity" 
+                            class="form-control" 
+                            value="{{ current_quantity }}" 
+                            readonly>
+                    </div>
+                      <div class="form-group">
+                        <label for="first_name">New Quantity</label>
+                     {{form.quantity}}
+                      
+                      </div>
+                      <div class="form-group">
+                        <label for="first_name">Notes</label>
+                     {{form.notes}}
+                      
+                      </div>
+                
+               
+                </div>
+                
+              
+              </div>
+            </div>
+            <div class="card-action">
+              <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+        </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // Initialize Select2
+      $('#product_id').select2(
+        {
+          theme: 'bootstrap-5',
+        }
+      );
+  
+      // Attach a change event listener
+      $('#product_id').on('change', function () {
+        console.log("Selected value:", $(this).val());
+
+        const productId = $(this).val() // Get selected product ID
+        const quantityField = document.getElementById('current-quantity');
+
+        if (productId) {
+            // Fetch product quantity based on the selected product ID
+            fetch(`/inventory/get-product-quantity/${productId}/`)
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.success) {
+                        quantityField.value = data.quantity;
+                    } else {
+                        quantityField.value = "Error fetching quantity";
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error:", error);
+                    quantityField.value = "Error fetching quantity";
+                });
+        } else {
+            quantityField.value = "Select a product to see the quantity";
+        }
+      });
+    });
+  </script>
+  
+  
+
+
+
+
+
+
+{% endblock %}

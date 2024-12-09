@@ -1,0 +1,166 @@
+{% extends "pos/layout.html" %}
+
+{% block title %}Userslist{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-inner">
+      <div class="page-header">
+        <h3 class="fw-bold mb-3"></h3>
+        <ul class="breadcrumbs mb-3">
+          <li class="nav-home">
+            <a href="#">
+              <i class="icon-home"></i>
+            </a>
+          </li>
+          <li class="separator">
+            <i class="icon-arrow-right"></i>
+          </li>
+          <li class="nav-item">
+            <a href="{% url 'dashboard:dashboardpage' %}">home</a>
+          </li>
+          <li class="separator">
+            <i class="icon-arrow-right"></i>
+          </li>
+          <li class="nav-item">
+            <a href="">users list</a>
+          </li>
+        </ul>
+      </div>
+
+
+
+            <!-- Delete Confirmation Modal -->
+            {% if messages %}
+            <div class="mt-4">
+              {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                  {{ message }}
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+           
+            <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered">
+                  <div class="modal-content">
+                      <div class="modal-header bg-danger text-white">
+                          <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                          <p>Are you sure you want to delete <strong id="productName"></strong>?</p>
+                          <p class="text-danger">This action cannot be undone!</p>
+                      </div>
+                      <div class="modal-footer">
+                          <button type="button" class="btn btn-sm btn-primary" data-bs-dismiss="modal">Cancel</button>
+                          <button type="button" id="confirmDelete" class="btn btn-sm btn-danger">Delete</button>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          
+            
+          
+
+      <div class="row">
+        <div class="col-md-12">
+          <div class="card">
+            <div class="card-header">
+              <h4 class="card-title">Users List</h4>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table
+                  id="basic-datatables"
+                  class="display table table-striped table-hover"
+                >
+                  <thead>
+                    <tr>
+                      <th>Fist Name</th>
+                      <th>Last Name</th>
+                      <th>Email</th>
+
+                      <th>Role</th>
+                      <th>Date Joined</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                 
+                  <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.first_name }}</td>
+                        <td>{{ user.last_name }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.role }}</td>
+                        <td>{{ user.date_joined }}</td>
+                        <td>
+                          <form id="delete-form-{{ user.id }}" method="POST" action="{% url 'users:deleteusers' user.id %}">
+                            {% csrf_token %}
+                        </form>
+                          <a  class="text-primary mx-2"  data-bs-toggle="tooltip" title="edit user" href="{% url 'users:editusers' user.id %}"><i class="fa fa-edit"></i></a>
+                          
+
+                          <a  class="delete-button text-danger" 
+                          data-product-id="{{ user.id }}" 
+                          data-product-name="{{ user.first_name }} {{user.last_name}}" 
+                          style="cursor: pointer;" 
+                          data-bs-toggle="modal" 
+                          data-bs-target="#deleteModal">
+                           <i  data-bs-toggle="tooltip" title="delete" class="fas fa-trash-alt"></i>
+                       </a>
+
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5">No users available.</td>
+                    </tr>
+                {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+<script>
+  document.querySelectorAll('.delete-button').forEach(button => {
+    button.addEventListener('click', function () {
+        // Get product data from attributes
+        const productId = this.getAttribute('data-product-id');
+        const productName = this.getAttribute('data-product-name');
+
+        // Update modal content
+        document.getElementById('productName').textContent = productName;
+
+        // Set the ID of the form to submit
+        document.getElementById('confirmDelete').setAttribute('data-form-id', `delete-form-${productId}`);
+    });
+});
+
+document.getElementById('confirmDelete').addEventListener('click', function () {
+    // Get the form ID from the data attribute
+    const formId = this.getAttribute('data-form-id');
+
+    // Submit the corresponding form
+    const form = document.getElementById(formId);
+    if (form) {
+        form.submit();
+    }
+});
+
+
+</script>
+
+
+
+     
+
+{% endblock %}
