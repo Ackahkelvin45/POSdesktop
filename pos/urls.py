@@ -17,5 +17,7 @@ urlpatterns = [
     path("product/", include("product.urls")),
     path("permission/", include("permissions.urls")),
   path("inventory/", include("inventory.urls")),
-  path("activities/", include("activities.urls"))
+  path("activities/", include("activities.urls")),
+    path("notifications/", include("notifications.urls")),
+    path("sales/", include("sales.urls"))
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

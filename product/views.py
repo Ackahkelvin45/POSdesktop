@@ -13,20 +13,21 @@ import pandas as pd
 from django.template.loader import get_template
 from xhtml2pdf import pisa
 from django.utils import timezone
-
+from .signals import reset_quantities_signal,delete_quantities_signal,delete_all_category_signal
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 
 # Create your views here.
 
 
-class ProductCategoryList(ListView):
+class ProductCategoryList(LoginRequiredMixin,ListView):
     model = ProductCategory
     template_name = 'products/categorylist.html'
     context_object_name = 'categories'
     
     
 
-class CreateProductCategoryView(FormView):
+class CreateProductCategoryView(LoginRequiredMixin,FormView):
     template_name = "products/addcategory.html"
     form_class = ProductCategoryForm
     success_url = reverse_lazy("product:categorylist")
@@ -51,7 +52,7 @@ class CreateProductCategoryView(FormView):
 
 
 
-class EditProductCategoryView(UpdateView):
+class EditProductCategoryView(LoginRequiredMixin,UpdateView):
     model = ProductCategory
     template_name = "products/editcategory.html"
     form_class = ProductCategoryForm
@@ -70,7 +71,7 @@ class EditProductCategoryView(UpdateView):
 
 
 
-class DeleteProductCategoryView(DeleteView):
+class DeleteProductCategoryView(LoginRequiredMixin,DeleteView):
     model = ProductCategory
     success_url = reverse_lazy("product:categorylist")
     
@@ -79,19 +80,29 @@ class DeleteProductCategoryView(DeleteView):
         return super().delete(request, *args, **kwargs)
     
     
-class DeleteAllProductCategoriesView(View):
+class DeleteAllProductCategoriesView(LoginRequiredMixin,View):
+    
+    
     def get(self, request, *args, **kwargs):
         # Delete all ProductCategories
-        ProductCategory.objects.all().delete()
+        ProductCategory.set_deleting_all(True) 
+        try:
+            ProductCategory.objects.all().delete()
+            delete_all_category_signal.send(sender=ProductCategory, user=request.user)          
+            messages.success(request, "All categories have been deleted successfully.")
         
-        messages.success(request, "All categories have been deleted successfully.")
-        return redirect('product:categorylist')
+
+            return redirect('product:categorylist')
+        finally:
+                 # Unset the deleting flag
+            ProductCategory.set_deleting_all(False)
     
-    
+        
+        
 
 
 
-class CreateProductView(FormView):
+class CreateProductView(LoginRequiredMixin,FormView):
     template_name="products/addproduct.html"
     form_class=ProductCreationForm
     success_url=reverse_lazy("product:productlist")
@@ -109,7 +120,7 @@ class CreateProductView(FormView):
 
 
 
-class ProductListView(ListView):
+class ProductListView(LoginRequiredMixin,ListView):
     model = Product
     template_name = 'products/productlist.html'
     context_object_name = 'products'
@@ -148,10 +159,18 @@ class DeleteProductView(DeleteView):
 class DeleteAllProductView(View):
     def get(self, request, *args, **kwargs):
         # Delete all ProductCategories
-        Product.objects.all().delete()
+        Product.set_deleting_all(True) 
+        try:
+            Product.objects.all().delete()
         
-        messages.success(request, "All products have been deleted successfully.")
-        return redirect('product:productlist') 
+            messages.success(request, "All products have been deleted successfully.")
+            delete_quantities_signal.send(sender=Product, user=request.user)
+
+            return redirect('product:productlist') 
+
+        finally:
+            # Unset the deleting flag
+            Product.set_deleting_all(False)
     
 class PackageListView(ListView):
     model = ProductPackage
@@ -380,20 +399,20 @@ class ExportProductPDFView(View):
         return response
     
     
-class DeleteAllProductView(View):
-    def get(self, request, *args, **kwargs):
-        # Delete all ProductCategories
-        Product.objects.all().delete()
-        
-        messages.success(request, "All product have been deleted successfully.")
-        return redirect('product:productlist')
+
     
 class ResetProductQuantityView(View):
     def get(self, request, *args, **kwargs):
-            # Reset available_quantity for all products to zero
-            Product.objects.update(available_quantity=0)
-            messages.success(request, "All product available_quantity have been set to zero.")
-            return redirect('product:productlist') 
+            Product.set_resetting(True)
 
+            try:
+                    # Reset available_quantity for all products to zero
+                    Product.objects.update(available_quantity=0)
+                    messages.success(request, "All product quantities have been successfully reset to zero.")
+                    reset_quantities_signal.send(sender=Product, user=request.user)
+            finally:
+                    # Unset the resetting flag
+                    Product.set_resetting(False)
+        
     
-    
+            return redirect('product:productlist')

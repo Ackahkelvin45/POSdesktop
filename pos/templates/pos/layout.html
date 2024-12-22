@@ -13,6 +13,8 @@
       href="{% static 'assets/img/kaiadmin/favicon.ico' %}"
       type="image/x-icon"
     />
+    <script src="{% static 'assets/js/core/jquery-3.7.1.min.js' %}"></script>
+
 
     <!-- Fonts and icons -->
     <script src="{% static 'assets/js/plugin/webfont/webfont.min.js' %}"></script>
@@ -39,7 +41,6 @@
     <link rel="stylesheet" href="{% static 'assets/css/plugins.min.css' %} " />
     <link rel="stylesheet" href="{% static 'assets/css/kaiadmin.min.css' %}" />
     <!--sweetalert-->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
    
     <!--select2js-->
 <!-- Styles -->
@@ -49,9 +50,10 @@
 <!-- Scripts -->
 
 
-<link rel="stylesheet" href="{% static 'js/plugin/select/select2.min.css' %}">
-<script src="{% static 'js/plugin/select/jquery.min.js' %}"></script>
-<script src="{% static 'js/plugin/select/select2.min.js' %}"></script>
+<link rel="stylesheet" href="{% static 'assets/js/select/select2.min.css' %}">
+<script src="{% static 'assets/js/select/jquery.min.js' %}"></script>
+<script src="{% static 'assets/js/select/select2.min.js' %}"></script>
+<script src="{% static 'assets/js/typeahead.bundle.js' %}"></script>
 
 
     <!-- CSS Just for demo purpose, don't include it in your project -->
@@ -136,6 +138,30 @@
 
 
               <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#submenu">
+                  <i class="fas fa-wallet"></i>
+                  <p>Sales</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="submenu">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="{% url 'sales:addsale'%}">
+                        <span class="sub-item">New sale </span>
+                      </a>
+                     
+                    </li>
+                   
+                    <li>
+                      <a href="#">
+                        <span class="sub-item">Paused sales</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+
+              <li class="nav-item">
                 <a data-bs-toggle="collapse" href="#charts">
                   <i class="fas fa-file-invoice"></i>
                   <p>Inventory Log</p>
@@ -209,7 +235,7 @@
               <li class="nav-item">
                 <a href="{% url 'activities:global_activity_logs'%}">
                   <i class="fas fa-user-clock"></i>
-                  <p>User Activities</p>
+                  <p>User Activity Log</p>
                 </a>
               </li>
               <li class="nav-item">
@@ -219,57 +245,7 @@
                   <span class="badge badge-secondary">1</span>
                 </a>
               </li>
-              <li class="nav-item">
-                <a data-bs-toggle="collapse" href="#submenu">
-                  <i class="fas fa-bars"></i>
-                  <p>Menu Levels</p>
-                  <span class="caret"></span>
-                </a>
-                <div class="collapse" id="submenu">
-                  <ul class="nav nav-collapse">
-                    <li>
-                      <a data-bs-toggle="collapse" href="#subnav1">
-                        <span class="sub-item">Level 1</span>
-                        <span class="caret"></span>
-                      </a>
-                      <div class="collapse" id="subnav1">
-                        <ul class="nav nav-collapse subnav">
-                          <li>
-                            <a href="#">
-                              <span class="sub-item">Level 2</span>
-                            </a>
-                          </li>
-                          <li>
-                            <a href="#">
-                              <span class="sub-item">Level 2</span>
-                            </a>
-                          </li>
-                        </ul>
-                      </div>
-                    </li>
-                    <li>
-                      <a data-bs-toggle="collapse" href="#subnav2">
-                        <span class="sub-item">Level 1</span>
-                        <span class="caret"></span>
-                      </a>
-                      <div class="collapse" id="subnav2">
-                        <ul class="nav nav-collapse subnav">
-                          <li>
-                            <a href="#">
-                              <span class="sub-item">Level 2</span>
-                            </a>
-                          </li>
-                        </ul>
-                      </div>
-                    </li>
-                    <li>
-                      <a href="#">
-                        <span class="sub-item">Level 1</span>
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-              </li>
+              
             </ul>
           </div>
         </div>
@@ -305,6 +281,29 @@
           </div>
           <!-- Navbar Header -->
           
+            <!-- Position it -->
+          
+
+
+             
+
+            <div id="notifications" style="position: fixed; top: 20px; right: 20px; z-index: 1031;display:flex; flex-direction:column" >
+
+
+          
+              
+
+
+              
+              
+
+            
+            </div>
+
+            
+
+
+    
           <nav
             class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom"
           >
@@ -352,97 +351,7 @@
                     </form>
                   </ul>
                 </li>
-                <li class="nav-item topbar-icon dropdown hidden-caret">
-                  <a
-                    class="nav-link dropdown-toggle"
-                    href="#"
-                    id="messageDropdown"
-                    role="button"
-                    data-bs-toggle="dropdown"
-                    aria-haspopup="true"
-                    aria-expanded="false"
-                  >
-                    <i class="fa fa-envelope"></i>
-                  </a>
-                  <ul
-                    class="dropdown-menu messages-notif-box animated fadeIn"
-                    aria-labelledby="messageDropdown"
-                  >
-                    <li>
-                      <div
-                        class="dropdown-title d-flex justify-content-between align-items-center"
-                      >
-                        Messages
-                        <a href="#" class="small">Mark all as read</a>
-                      </div>
-                    </li>
-                    <li>
-                      <div class="message-notif-scroll scrollbar-outer">
-                        <div class="notif-center">
-                          <a href="#">
-                            <div class="notif-img">
-                              <img
-                                src="../assets/img/jm_denis.jpg"
-                                alt="Img Profile"
-                              />
-                            </div>
-                            <div class="notif-content">
-                              <span class="subject">Jimmy Denis</span>
-                              <span class="block"> How are you ? </span>
-                              <span class="time">5 minutes ago</span>
-                            </div>
-                          </a>
-                          <a href="#">
-                            <div class="notif-img">
-                              <img
-                                src="../assets/img/chadengle.jpg"
-                                alt="Img Profile"
-                              />
-                            </div>
-                            <div class="notif-content">
-                              <span class="subject">Chad</span>
-                              <span class="block"> Ok, Thanks ! </span>
-                              <span class="time">12 minutes ago</span>
-                            </div>
-                          </a>
-                          <a href="#">
-                            <div class="notif-img">
-                              <img
-                                src="../assets/img/mlane.jpg"
-                                alt="Img Profile"
-                              />
-                            </div>
-                            <div class="notif-content">
-                              <span class="subject">Jhon Doe</span>
-                              <span class="block">
-                                Ready for the meeting today...
-                              </span>
-                              <span class="time">12 minutes ago</span>
-                            </div>
-                          </a>
-                          <a href="#">
-                            <div class="notif-img">
-                              <img
-                                src="../assets/img/talha.jpg"
-                                alt="Img Profile"
-                              />
-                            </div>
-                            <div class="notif-content">
-                              <span class="subject">Talha</span>
-                              <span class="block"> Hi, Apa Kabar ? </span>
-                              <span class="time">17 minutes ago</span>
-                            </div>
-                          </a>
-                        </div>
-                      </div>
-                    </li>
-                    <li>
-                      <a class="see-all" href="javascript:void(0);"
-                        >See all messages<i class="fa fa-angle-right"></i>
-                      </a>
-                    </li>
-                  </ul>
-                </li>
+               
                 <li class="nav-item topbar-icon dropdown hidden-caret">
                   <a
                     class="nav-link dropdown-toggle"
@@ -454,72 +363,47 @@
                     aria-expanded="false"
                   >
                     <i class="fa fa-bell"></i>
-                    <span class="notification">4</span>
+                    <span id="notification" class="notification"> </span>
                   </a>
+                  
                   <ul
-                    class="dropdown-menu notif-box animated fadeIn"
-                    aria-labelledby="notifDropdown"
-                  >
-                    <li>
-                      <div class="dropdown-title">
-                        You have 4 new notification
-                      </div>
-                    </li>
-                    <li>
-                      <div class="notif-scroll scrollbar-outer">
-                        <div class="notif-center">
-                          <a href="#">
-                            <div class="notif-icon notif-primary">
-                              <i class="fa fa-user-plus"></i>
-                            </div>
-                            <div class="notif-content">
-                              <span class="block"> New user registered </span>
-                              <span class="time">5 minutes ago</span>
-                            </div>
-                          </a>
-                          <a href="#">
-                            <div class="notif-icon notif-success">
-                              <i class="fa fa-comment"></i>
-                            </div>
-                            <div class="notif-content">
-                              <span class="block">
-                                Rahmad commented on Admin
-                              </span>
-                              <span class="time">12 minutes ago</span>
-                            </div>
-                          </a>
-                          <a href="#">
-                            <div class="notif-img">
-                              <img
-                                src="../assets/img/profile2.jpg"
-                                alt="Img Profile"
-                              />
-                            </div>
-                            <div class="notif-content">
-                              <span class="block">
-                                Reza send messages to you
-                              </span>
-                              <span class="time">12 minutes ago</span>
-                            </div>
-                          </a>
-                          <a href="#">
-                            <div class="notif-icon notif-danger">
-                              <i class="fa fa-heart"></i>
-                            </div>
-                            <div class="notif-content">
-                              <span class="block"> Farrah liked Admin </span>
-                              <span class="time">17 minutes ago</span>
-                            </div>
-                          </a>
-                        </div>
-                      </div>
-                    </li>
-                    <li>
-                      <a class="see-all" href="javascript:void(0);"
-                        >See all notifications<i class="fa fa-angle-right"></i>
-                      </a>
-                    </li>
-                  </ul>
+  class="dropdown-menu notif-box animated fadeIn mt-5"
+  aria-labelledby="notifDropdown"
+  id="notificationDropdown"
+  data-bs-popper="static"
+>
+  <li>
+    <div class="dropdown-title" id="notifCount">
+      You have 0 new notifications
+    </div>
+  </li>
+  <li>
+    <div
+      class="scroll-wrapper notif-scroll scrollbar-outer"
+      style="position: relative;"
+    >
+      <div
+        class="notif-scroll scrollbar-outer scroll-content"
+        id="notifList"
+        style="height: auto; margin-bottom: 0px; margin-right: 0px; max-height: 170px;"
+      >
+<div class="notif-center" id="notif-center">
+
+</div>
+    </div>
+    </div>
+  </li>
+  <li>
+    <a class="see-all" href="{% url 'notifications:notificationsall'%}">See all notifications
+      <i class="fa fa-angle-right"></i>
+    </a>
+  </li>
+</ul>
+
+
+
+
+
                 </li>
                 <li class="nav-item topbar-icon dropdown hidden-caret">
                   <a
@@ -543,7 +427,7 @@
                               <div class="avatar-item bg-danger rounded-circle">
                                 <i class="far fa-calendar-alt"></i>
                               </div>
-                              <span class="text">Calendar</span>
+                              <span class="text">Sell</span>
                             </div>
                           </a>
                           <a class="col-6 col-md-4 p-0" href="#">
@@ -553,7 +437,7 @@
                               >
                                 <i class="fas fa-map"></i>
                               </div>
-                              <span class="text">Maps</span>
+                              <span class="text">Add Product</span>
                             </div>
                           </a>
                           <a class="col-6 col-md-4 p-0" href="#">
@@ -561,7 +445,7 @@
                               <div class="avatar-item bg-info rounded-circle">
                                 <i class="fas fa-file-excel"></i>
                               </div>
-                              <span class="text">Reports</span>
+                              <span class="text">Add Inventory</span>
                             </div>
                           </a>
                           <a class="col-6 col-md-4 p-0" href="#">
@@ -571,7 +455,7 @@
                               >
                                 <i class="fas fa-envelope"></i>
                               </div>
-                              <span class="text">Emails</span>
+                              <span class="text">Activity Log</span>
                             </div>
                           </a>
                           <a class="col-6 col-md-4 p-0" href="#">
@@ -607,32 +491,46 @@
                     href="#"
                     aria-expanded="false"
                   >
-                    <div class="avatar-sm">
-                      <img
-                        src="../assets/img/profile.jpg"
-                        alt="..."
-                        class="avatar-img rounded-circle"
-                      />
-                    </div>
+                    
+                  <div class="avatar">
+              
+                    <span class="avatar-title rounded-circle border border-white">
+                      {% if user.role == "admin" %}
+                          AD
+                      {% elif user.role == "cashier" %}
+                          CS
+                      {% else %}
+                          MN
+                      {% endif %}
+                  </span>
+                  
+                  </div>
                     <span class="profile-username">
                       <span class="op-7">Hi,</span>
-                      <span class="fw-bold">Hizrian</span>
+                      <span class="fw-bold">{{user.first_name}}</span>
                     </span>
                   </a>
                   <ul class="dropdown-menu dropdown-user animated fadeIn">
                     <div class="dropdown-user-scroll scrollbar-outer">
                       <li>
                         <div class="user-box">
-                          <div class="avatar-lg">
-                            <img
-                              src="../assets/img/profile.jpg"
-                              alt="image profile"
-                              class="avatar-img rounded"
-                            />
+                        
+                          <div class="avatar">
+              
+                            <span class="avatar-title rounded-circle border border-white">
+                              {% if user.role == "admin" %}
+                                  AD
+                              {% elif user.role == "cashier" %}
+                                  CS
+                              {% else %}
+                                  MN
+                              {% endif %}
+                          </span>
+                          
                           </div>
                           <div class="u-text">
-                            <h4>Hizrian</h4>
-                            <p class="text-muted">hello@example.com</p>
+                            <h4>{{user.first_name}} {{user.last_name}}</h4>
+                            <p class="text-muted">{{user.email}}</p>
                             <a
                               href="profile.html"
                               class="btn btn-xs btn-secondary btn-sm"
@@ -643,16 +541,10 @@
                       </li>
                       <li>
                         <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">My Profile</a>
-                        <a class="dropdown-item" href="#">My Balance</a>
-                        <a class="dropdown-item" href="#">Inbox</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">Account Setting</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item"  onclick="document.getElementById('logout-form').submit();">Logout</a>
+                        <a class="dropdown-item"  style="cursor: pointer;"  onclick="document.getElementById('logout-form').submit();">Logout</a>
                       </li>
                     </div>
-                    <form id="logout-form" action="{% url 'auth:logout'%}?next={{request.path}}" method="post" style="display: none;">
+                    <form id="logout-form" action="{% url 'auth:logout'%}" method="post" style="display: none;">
                       {% csrf_token %}
                   </form>
                   </ul>
@@ -661,7 +553,7 @@
             </div>
           </nav>
 
-          <div id="statusAlert" role="alert" class="alert checking text-center d-flex justify-content-center align-items-center">
+          <div id="statusAlert" style="z-index: -1;" role="alert" class="alert checking text-center d-flex justify-content-center align-items-center">
             <div id="progress" class="progress mx-2"></div>
             <span id="statusMessage">Checking your internet connection...</span>
           </div>
@@ -672,7 +564,7 @@
 
 
     
-      
+         
       
     
       </div>
@@ -723,43 +615,239 @@
     
 </div>
       <!-- Custom template | don't include it in your project! -->
-     
+      
+      
       <!-- End Custom template -->
     </div>
-    
+
+
+
+  
+
+<script>
+
+  // Function to update UI based on connection status
+function updateConnectionStatus(isOnline) {
+  const statusMessage = document.getElementById('statusMessage');
+  const statusAlert = document.getElementById('statusAlert');
+  const progress = document.getElementById('progress');
+
+  if (isOnline) {
+      statusMessage.textContent = 'Online';
+      statusAlert.className = 'alert alert-success online text-center d-flex justify-content-center align-items-center';
+  } else {
+      statusMessage.textContent = 'Offline';
+      statusAlert.className = 'alert alert-danger offline text-center d-flex justify-content-center align-items-center';
+  }
+  progress.style.display = 'none';
+}
+
+// Function to check internet connectivity using Google
+async function checkConnection() {
+  try {
+      const timestamp = new Date().getTime();
+      const response = await fetch('https://www.google.com/favicon.ico?' + timestamp, {
+          mode: 'no-cors',
+          method: 'HEAD',
+          cache: 'no-store',
+          signal: AbortSignal.timeout(5000)
+      });
+      updateConnectionStatus(true);
+  } catch (error) {
+      console.log('Connection check failed:', error);
+      updateConnectionStatus(false);
+  }
+}
+
+// Initialize and start periodic checking
+document.addEventListener('DOMContentLoaded', function() {
+  // Initial check
+  checkConnection();
+  
+  // Check every 30 seconds
+  setInterval(checkConnection, 30000);
+});
+</script>
+
+
+
     <script>
-      const connectivitySocket = new WebSocket('ws://localhost:8001/ws/connectivity/');
+      function timeAgo(dateString) {
+        const date = new Date(dateString); // Convert string to Date object
+        const now = new Date(); // Get current date and time
     
-      const statusMessage = document.getElementById('statusMessage');
-      const statusAlert = document.getElementById('statusAlert');
-      const progress = document.getElementById('progress');
-      connectivitySocket.onopen = function (e) {
-        console.log('WebSocket connection established');
-      };
+        const diffInSeconds = Math.floor((now - date) / 1000); // Difference in seconds
+        const diffInMinutes = Math.floor(diffInSeconds / 60); // Difference in minutes
+        const diffInHours = Math.floor(diffInMinutes / 60); // Difference in hours
+        const diffInDays = Math.floor(diffInHours / 24); // Difference in days
+        const diffInMonths = Math.floor(diffInDays / 30); // Difference in months (approx)
+        const diffInYears = Math.floor(diffInDays / 365); // Difference in years (approx)
     
-      connectivitySocket.onmessage = function (e) {
-        const data = JSON.parse(e.data);
-    
-        // Update the status based on the connection status
-        if (data.is_connected) {
-          statusMessage.textContent = 'Online';
-          statusAlert.className = 'alert alert-success online text-center d-flex justify-content-center align-items-center';
-          progress.style.display = 'none';
+        if (diffInSeconds < 60) {
+          return `${diffInSeconds} seconds ago`;
+        } else if (diffInMinutes < 60) {
+          return `${diffInMinutes} minutes ago`;
+        } else if (diffInHours < 24) {
+          return `${diffInHours} hours ago`;
+        } else if (diffInDays < 30) {
+          return `${diffInDays} days ago`;
+        } else if (diffInMonths < 12) {
+          return `${diffInMonths} months ago`;
         } else {
-          statusMessage.textContent = 'Offline';
-          statusAlert.className = 'alert alert-danger offline text-center d-flex justify-content-center align-items-center';
-          progress.style.display = 'none';
+          return `${diffInYears} years ago`;
         }
+      }
+    
+      const notificationSocket = new WebSocket('ws://localhost:8001/ws/notifications/');
+      
+      notificationSocket.onopen = function (e) {
+        console.log('WebSocket for notification connection established');
       };
     
-      connectivitySocket.onerror = function (error) {
+      notificationSocket.onmessage = function (e) {
+        const data = JSON.parse(e.data);
+        console.log("Missed Notification:", data.message);
+        const notifItem1 = document.getElementById("notifications");
+    
+        notifItem1.innerHTML += `  
+            <div class="toast fade show mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+              <div class="toast-header" style="display: flex; flex-direction: row; justify-content: space-between;">
+                <div class="d-flex justify-content-center align-items-center">
+                  <span class="badge badge-success">
+                    <i class="fas fa-bell fa-lg py-1"></i>
+                  </span>
+                  <strong class="mx-2 fs-6">${data.title}</strong>
+                </div>
+                <div class="d-flex justify-content-center align-items-center">
+                  <small class="text-muted mx-2">${timeAgo(data.timestamp)}</small>
+                  <button type="button" class="ml-2 close" aria-label="Close">
+                    <span aria-hidden="true" style="font-size: x-large;">×</span>
+                  </button>
+                </div>
+              </div>
+              <div class="toast-body">
+                ${data.message}
+              </div>
+            </div>`;
+    
+        // Re-attach event listeners to dynamically added close buttons
+        const closeButtons = document.querySelectorAll('.close');
+        
+        closeButtons.forEach(button => {
+          button.addEventListener('click', function() {
+            const toast = this.closest('.toast');
+            if (toast) {
+              toast.classList.remove('show');
+              console.log("Toast closed");
+            }
+          });
+        });
+      };
+    
+      notificationSocket.onerror = function (error) {
         console.error('WebSocket Error:', error);
-        statusMessage.textContent = 'Connection error!';
-        statusAlert.className = 'alert alert-warning text-center offline d-flex justify-content-center align-items-center';
-        progress.style.display = 'none';
       };
     </script>
+    
+    <script>
+   
+     
+      
+      document.addEventListener("DOMContentLoaded", function () {
 
+
+        function timeAgo(dateString) {
+          const date = new Date(dateString); // Convert string to Date object
+          const now = new Date(); // Get current date and time
+      
+          const diffInSeconds = Math.floor((now - date) / 1000); // Difference in seconds
+          const diffInMinutes = Math.floor(diffInSeconds / 60); // Difference in minutes
+          const diffInHours = Math.floor(diffInMinutes / 60); // Difference in hours
+          const diffInDays = Math.floor(diffInHours / 24); // Difference in days
+          const diffInMonths = Math.floor(diffInDays / 30); // Difference in months (approx)
+          const diffInYears = Math.floor(diffInDays / 365); // Difference in years (approx)
+      
+          if (diffInSeconds < 60) {
+            return `${diffInSeconds} seconds ago`;
+          } else if (diffInMinutes < 60) {
+            return `${diffInMinutes} minutes ago`;
+          } else if (diffInHours < 24) {
+            return `${diffInHours} hours ago`;
+          } else if (diffInDays < 30) {
+            return `${diffInDays} days ago`;
+          } else if (diffInMonths < 12) {
+            return `${diffInMonths} months ago`;
+          } else {
+            return `${diffInYears} years ago`;
+          }
+        }
+      
+
+        const notifDropdown = document.getElementById("notificationDropdown");
+        const notifList = document.getElementById("notif-center");
+        const notifCount = document.getElementById("notifCount");
+        const notifNumber=document.getElementById('notification')
+      
+        // Function to fetch notifications
+        async function fetchNotifications() {
+          try {
+            const response = await fetch("/notifications/list"); // Replace with your API URL
+            if (!response.ok) {
+              throw new Error("Failed to fetch notifications");
+            }
+      
+            const data = await response.json();
+            const notifications = data.notifications;
+           
+            const totalCount = data.total_count;
+      
+            // Update notification count
+            if (totalCount >0){
+              notifCount.classList.add("text-success")
+            }
+            notifCount.textContent = `You have ${totalCount} new notifications`;
+            notifNumber.textContent=totalCount
+      
+            // Clear existing notifications
+           notifList.innerHTML="  "
+      
+            // Append new notifications
+            notifications.forEach((notif) => {
+
+             
+
+              notifList.innerHTML+=`
+              <a href="#">
+                            <div class="notif-icon notif-success">
+                              <i class="fa fa-bell"></i>
+                            </div>
+                            <div class="notif-content">
+                              <span class="block">
+                                ${notif.title}
+                              </span>
+                              <span class="block text-muted">${ notif.message.length >30?notif.message.slice(0,30) +'...':notif.message}</span>
+                              <span class="time">${timeAgo(notif.created_at)}</span>
+                            </div>
+                          </a>`
+              
+            });
+          } catch (error) {
+            console.error("Error fetching notifications:", error);
+          }
+        }
+      
+        // Fetch notifications on page load
+        fetchNotifications();
+      
+        // Optional: Refresh notifications periodically
+        setInterval(fetchNotifications, 30000); // Refresh every 30 seconds
+      });
+      
+    </script>
+
+
+    
+   
     <style>
 
      /* Chrome, Safari, Edge, Opera */
@@ -777,7 +865,6 @@ input[type=number] {
       
     </style>
     <!--   Core JS Files   -->
-    <script src="{% static 'assets/js/core/jquery-3.7.1.min.js' %}"></script>
     <script src="{% static 'assets/js/core/popper.min.js' %}"></script>
     <script src="{% static 'assets/js/core/bootstrap.min.js' %}"></script>
 
@@ -822,11 +909,17 @@ input[type=number] {
     <script src="{% static 'assets/js/setting-demo2.js' %}"></script>
       <!--Filepond-->
 
-    <script src="{% static 'js/plugin/datatables/datatables.min.js' %}"></script>
+    <script src="{% static 'assets/js/plugin/datatables/datatables.min.js' %}"></script>
    
      <script>
+
+
+
        $(document).ready(function () {
-         $("#basic-datatables").DataTable({});
+        
+        $("#basic-datatables").DataTable({
+          "ordering": false, 
+        });
  
          $("#multi-filter-select").DataTable({
            pageLength: 5,
@@ -880,6 +973,13 @@ input[type=number] {
            $("#addRowModal").modal("hide");
          });
        });
+
+
+
+                   // Ensure the close button works
+            $('[data-notify="dismiss"]').on('click', function () {
+                $(this).closest('[data-notify="container"]').remove();
+            });
      </script>
   </body>
 </html>

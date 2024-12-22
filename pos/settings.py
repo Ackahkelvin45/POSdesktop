@@ -50,6 +50,8 @@ INSTALLED_APPS = [
     'dashboard',
     'inventory',
     'activities',
+    'notifications',
+    'sales',
     
 ]
 

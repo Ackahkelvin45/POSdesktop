@@ -8,5 +8,5 @@ def showDasboard(request):
 
 class DashboardView(LoginRequiredMixin,TemplateView):
     template_name = 'dashboard/dashboard.html'
-    login_url = 'auth:login'
+   
     

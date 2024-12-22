@@ -9,15 +9,15 @@ from django.views.generic.edit import UpdateView,DeleteView
 from authentication.models import CustomUser
 from django.contrib.auth import get_user_model
 from django.views.generic.edit import DeleteView
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 
-
-class UserListView(ListView):
+class UserListView(LoginRequiredMixin,ListView):
     model=CustomUser
     template_name="users/userlist.html"
     context_object_name="users"
 
-class CreateUserView(FormView):
+class CreateUserView(LoginRequiredMixin,FormView):
     template_name = 'users/adduser.html'
     form_class = UserCreationForm
     success_url = reverse_lazy('users:userslist')  # Replace 'success_url' with your actual URL name
@@ -32,7 +32,7 @@ class CreateUserView(FormView):
         
         return super().form_invalid(form)
 
-class EditUserView(UpdateView):
+class EditUserView(LoginRequiredMixin,UpdateView):
     model = get_user_model()
     form_class = EditUserForm  # The form for editing user data
     template_name = 'users/edituser.html'  # Template to render the form
@@ -61,7 +61,7 @@ class EditUserView(UpdateView):
 
     
 
-class DeleteUserView(DeleteView):
+class DeleteUserView(LoginRequiredMixin,DeleteView):
     model = CustomUser
     success_url = reverse_lazy('users:userslist')  
     

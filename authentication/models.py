@@ -34,7 +34,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)  # Allows admin access to the admin site
     date_joined = models.DateTimeField(auto_now_add=True)
-   
+
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='cashier')
 
     objects = CustomUserManager()

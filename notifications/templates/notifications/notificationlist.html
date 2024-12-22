@@ -1,0 +1,129 @@
+{% extends "pos/layout.html" %}
+
+{% block title %}Userslist{% endblock %}
+
+{% block content %}
+<style>
+  .menu-item {
+      display: inline-block;
+      padding: 10px 4px;
+  }
+  .menu-item:not(:last-child)::after {
+      content: "|";
+      margin-left: 0px;
+      color: #ccc;
+  }
+</style>
+<div class="container">
+    <div class="page-inner">
+      <div class="page-header">
+        <ul class="breadcrumbs mb-3 ">
+          <li class="nav-home">
+            <a href="#">
+              <i class="icon-home"></i>
+            </a>
+          </li>
+          <li class="separator">
+            <i class="icon-arrow-right"></i>
+          </li>
+          <li class="nav-item">
+            <a href="{% url 'dashboard:dashboardpage' %}">home</a>
+          </li>
+          <li class="separator">
+            <i class="icon-arrow-right"></i>
+          </li>
+          <li class="nav-item">
+            <a href="">notifications</a>
+          </li>
+        </ul>
+      </div>
+     
+
+
+
+
+      <div class="row">
+        <div class="col-md-12">
+          <ul class="timeline">
+            {% for notification in notifications %}
+          
+            <li class="{% if forloop.counter|divisibleby:2 %}timeline-inverted{% endif %}">
+              <div class="timeline-badge {% if notification.is_read%} {%else%} success {% endif %}">
+                <i class="far fa-bell"></i>
+              </div>
+             
+              <div class="timeline-panel">
+                <div class="timeline-heading">
+                  <h4 class="timeline-title">{{notification.title}}</h4>
+                  <p>
+                    <small class="text-muted"><i class="far fa-clock"></i>  {{ notification.created_at|timesince }} ago</small>
+                  </p>
+                </div>
+                <div class="timeline-body">
+                  <p>
+                   {{notification.message}}
+                  </p>
+                </div>
+              </div>
+            </li>
+            {% empty %}
+            
+            <li class="timeline-inverted">
+              <div class="timeline-badge success">
+                <i class="far fa-bell"></i>
+              </div>
+              <div class="timeline-panel">
+                <div class="timeline-heading">
+                  <h4 class="timeline-title">Mussum ipsum cacilds</h4>
+                </div>
+                <div class="timeline-body">
+                  <p>
+                    Far far away, behind the word mountains, far from the
+                    countries Vokalia and Consonantia, there live the
+                    blind texts.
+                  </p>
+                </div>
+              </div>
+            </li>
+            {%endfor%}
+       
+          </ul>
+        </div>
+      </div>
+
+
+
+
+
+
+
+
+    </div>
+  </div>
+
+
+
+
+  <script>
+    // Trigger when the user is leaving the page
+    window.addEventListener('beforeunload', function () {
+        $.ajax({
+            type: "POST",
+            url: "{% url 'notifications:mark_as_read' %}",
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function (response) {
+                console.log("Notifications marked as read.");
+            },
+            error: function () {
+                console.error("Failed to mark notifications as read.");
+            }
+        });
+    });
+</script>
+
+         
+ 
+  
+{% endblock %}

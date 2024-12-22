@@ -1,0 +1,824 @@
+{% extends "pos/layout.html" %}
+
+{% block title %}Userslist{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-inner">
+      <div class="page-header">
+        <h3 class="fw-bold mb-3"></h3>
+      
+      </div>
+      
+      <div class="row">
+        <div class="col-md-12">
+          <div class="card">
+            <div>
+            <div class="card-header">
+              <div class="card-title">Add sale  </div>
+            </div>
+            <div class="card-body p-0 m-0 ">
+                {% if messages %}
+                <div class="alert alert-danger  alert-dismissible fade show">
+                  {% for message in messages %}
+                    <p>{{ message }}</p>
+                  {% endfor %}
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+              {% endif %}
+              <div class="row m-0">
+               
+                <div class="col-xl-8  py-2 px-0">
+                 
+                  <div class="d-flex justify-content-end">
+                    <input type="datetime-local" id="date" class="form-control w-auto">
+                </div>
+                
+                <form id="searchform" method="POST" action="{% url 'sales:product-filter'%}" >
+                        <div class="form-group mb-3" >
+                          
+                            {% csrf_token %}
+                          <label for="first_name">Product</label>
+
+                          <div class="input-icon">
+                            <input id="product-search" type="text" class="form-control" name="name" placeholder="Search for...">
+                            <button type="submit " style="border: none;background-color: transparent;" class="input-icon-addon">
+                              <i class="fa fa-search"></i>
+                            </button>
+                          </div>
+                       
+                        </div>
+                      </form>
+
+                      <div class="table-responsive custom-scrollbar" >
+                        <table id="salestable" class="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Unit Price (GH₵)</th>
+                                    <th scope="col">Bulk Price (GH₵)</th>
+                                    <th scope="col">Available Quantity</th>
+                                    <th scope="col">Sale Type</th>
+                                    <th scope="col">Quantity</th>
+                                    <th scope="col">Action</th>
+
+                                </tr>
+                            </thead>
+                            <tbody id="sale-products-table-body" style="max-height: 300px; overflow-y: scroll; ">
+                                <!-- Add rows dynamically here or statically -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                        
+                       
+                        <div class="col-12 d-flex justify-content-center align-items-center flex-row mb-2">
+                          <div class="me-3 my-4" id="item-count">
+                              0 items
+                          </div>
+                          <div class="flex-grow-1">
+                              <hr>
+                          </div>
+                      </div>
+
+                     
+                     
+                   
+               
+                </div>
+                <div class="col-xl-4 mt-2">
+                  <div class="card p-0  border "  >
+                    <div class="card-body " style="background-color:#f8f8f0;">
+                      <div class="container  w-full">
+                        <div class="row p-0 text-start w-full">
+                          <ul class="list-unstyled p-0">
+                            <li class="text-muted"><span class="text-black">Salesperson:</span> {{ user.first_name  }} {{user.last_name}}</li>
+                            <li class="text-muted mt-1"><span class="text-black">Date:</span> <span id="receiptdate"></span></li>
+
+                          </ul>
+                          <hr class="my-1">
+                          
+                        </div>
+                        
+                        
+                        </div>
+                        
+                        
+                        <div class="row ">
+
+                          <div class="col-12 text-muted">
+                            <p class="float-end fw-bold tax">Tax: GH₵ 0.00
+                            </p>
+                          </div>
+
+                          <div class="col-12 text-muted">
+                            <p class="float-end fw-bold discount">Discount: GH₵ 0.00
+                            </p>
+                          </div>
+                          <div class="col-12 text-muted">
+                            <p class="float-end fw-bold subTotal">Sub Total:  GH₵ 0.00
+                            </p>
+                          </div>
+                  
+                          <div class="col-12 text-black">
+                            <p class="float-end fw-bold total">Total: GH₵  0.00
+                            </p>
+                          </div>
+                          <hr style="border: 2px solid rgb(79, 79, 79);">
+                        </div>
+                        
+                      </div>
+                    </div>
+
+                    <div  class="d-flex flex-column my-5 border rounded">
+                      <div  class="d-flex flex-row  w-100 ">
+                        
+                        <div class="d-flex flex-column border-end border-bottom  w-50 border  p-2 justify-content-center align-items-center">
+                          <div style="width:50px;height:50px" class="bg-warning rounded-circle d-flex justify-content-center align-items-center text-white">
+                            <i class="fas fa-pause fs-4"></i>
+                            
+                          </div>
+                          <span>Pause Sale</span>
+                        </div>
+                        
+                        <div class="d-flex  w-50 flex-column border-end border-bottom  border  p-2 justify-content-center align-items-center">
+                          <div style="width:50px;height:50px" class="bg-success rounded-circle d-flex justify-content-center align-items-center text-white">
+                            <i class="fas fa-check fs-4"></i>
+                            
+                          </div>
+                          <span>Complete Sale</span>
+                        </div>
+                          
+                        </div>
+                        <div  class="d-flex flex-row w-100 ">
+                        
+                          <div class="d-flex w-50 flex-column border-end border-bottom  border  p-2 justify-content-center align-items-center">
+                            <div style="width:50px;height:50px" class="bg-danger rounded-circle d-flex justify-content-center align-items-center text-white">
+                              <i class=" fas fa-undo fs-4"></i>
+                             
+                            </div>
+                            <span>Reset Sale</span>
+                          </div>
+                          
+                          <div class="d-flex  w-50 flex-column border-end border-bottom  border  p-2 justify-content-center align-items-center">
+                            <div style="width:50px;height:50px" class="bg-danger rounded-circle d-flex justify-content-center align-items-center text-white">
+                              <i class="fas fa-pause fs-4"></i>
+                              
+                            </div>
+                            <span>Pause Sale</span>
+                          </div>
+                            
+                          </div>
+                      </div>
+
+
+                    </div>
+                  </div>
+                </div>
+                
+              
+              </div>
+            </div>
+            
+        </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  
+
+  <div class="modal fade" id="alreadyExist" tabindex="-1" aria-labelledby="alreadyExistLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-white">
+                <h5 class="modal-title" id="alreadyExistLabel">Product Already Selected</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>This product is already in your selection. You can adjust the quantity directly in the table below if needed.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="modal fade" id="notFound" tabindex="-1" aria-labelledby="notFoundLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-warning text-white">
+        <h5 class="modal-title fw-bold" id="notFoundLabel">
+          <i class="bi bi-exclamation-circle me-2"></i> Product Not Found
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <p class="fs-5 mb-0">The product you searched for could not be located.</p>
+        <p class="text-muted mt-2">Please check the product name and try again.</p>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+
+
+<div class="modal fade" id="noName" tabindex="-1" aria-labelledby="noNameLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-warning text-white">
+        <h5 class="modal-title fw-bold" id="noNameLabel">
+          <i class="bi bi-exclamation-triangle me-2"></i> Missing Product Name
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <p class="fs-5 mb-0">Please enter a product name to perform a search.</p>
+        <p class="text-muted mt-2">The search field cannot be left blank.</p>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+
+
+
+<script>
+  window.onload = function() {
+    var now = new Date();
+    var year = now.getFullYear();
+    var month = now.toLocaleString('default', { month: 'short' }); // Short month name (e.g., 'Dec')
+    var day = String(now.getDate()).padStart(2, '0');
+    var hours = now.getHours();
+    var minutes = String(now.getMinutes()).padStart(2, '0');
+    var ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12; // Convert to 12-hour format
+    hours = hours ? hours : 12; // Handle midnight as 12, not 0
+
+    // Format the datetime-local value: YYYY-MM-DDTHH:MM
+    var formattedDate = year + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + day + 'T' + String(now.getHours()).padStart(2, '0') + ':' + minutes;
+
+    // Set the value of the input to the current date and time
+    document.getElementById('date').value = formattedDate;
+
+    // Format the date to the desired format for the receipt
+    var formattedReceiptDate = `${day} ${month}, ${year} ${hours}:${minutes} ${ampm}`;
+    document.getElementById("receiptdate").innerText = formattedReceiptDate;
+};
+
+// Get the datetime-local input element
+const datetimeInput = document.getElementById('date');
+
+// Add an event listener to detect changes
+datetimeInput.addEventListener('change', function() {
+    // Get the current value of the input (the selected date and time)
+    const selectedDateTime = new Date(datetimeInput.value);
+    var day = String(selectedDateTime.getDate()).padStart(2, '0');
+    var month = selectedDateTime.toLocaleString('default', { month: 'short' });
+    var year = selectedDateTime.getFullYear();
+    var hours = selectedDateTime.getHours();
+    var minutes = String(selectedDateTime.getMinutes()).padStart(2, '0');
+    var ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // Handle midnight as 12, not 0
+
+    var formattedReceiptDate = `${day} ${month}, ${year} ${hours}:${minutes} ${ampm}`;
+    document.getElementById("receiptdate").innerText = formattedReceiptDate;
+});
+
+</script>
+
+
+
+
+
+<script>
+  $(document).ready(function () {
+      // Initialize Typeahead for product search
+      var products = new Bloodhound({
+          datumTokenizer: Bloodhound.tokenizers.obj.whitespace('text'), // Tokenize by 'text' property
+          queryTokenizer: Bloodhound.tokenizers.whitespace,
+          prefetch: {
+              url: "{% url 'sales:product_autocomplete' %}",
+              transform: function (response) { // Adjust transform based on server response
+                  return response.results; // Ensure `response.results` contains an array of objects
+              }
+          }
+      });
+
+      // Attach Typeahead to the input
+      $('#product-search').typeahead(
+          {
+              hint: true,
+              highlight: true,
+              minLength: 1,
+          },
+          {
+              name: 'products',
+              source: products,
+              display: 'text',  // 'text' will be used as the displayed product name in the input
+              limit: 10
+          }
+      );
+
+      const saleProducts = [];
+
+  });
+</script>
+<script>
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const form = document.querySelector('#searchform');
+    const saleProductsTableBody = document.querySelector('#sale-products-table-body');
+    const productSearchInput = document.querySelector('#product-search');
+    const itemCountElement = document.getElementById('item-count');
+    const alreadyExist = new bootstrap.Modal(document.getElementById('alreadyExist'));
+    const notFound = new bootstrap.Modal(document.getElementById('notFound'));
+    const noName = new bootstrap.Modal(document.getElementById('noName'));
+    const pauseSaleButtons = document.querySelectorAll('.d-flex.flex-column.border-end.border-bottom.w-50.border.p-2:has(.fa-pause)');
+    const resetSaleButton = document.querySelector('.bg-danger:has(.fa-undo)').closest('.d-flex');
+    const completeSaleButton = document.querySelector('.bg-success:has(.fa-check)').closest('.d-flex');
+
+
+
+    // Add reset sale confirmation modal HTML
+    const resetConfirmationModalHTML = `
+        <div class="modal fade" id="resetConfirmationModal" tabindex="-1" aria-labelledby="resetConfirmationModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title" id="resetConfirmationModalLabel">Confirm Reset</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to reset this sale? This action cannot be undone.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-danger" id="confirmResetBtn">Reset Sale</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', resetConfirmationModalHTML);
+    const resetConfirmationModal = new bootstrap.Modal(document.getElementById('resetConfirmationModal'));
+
+    // Function to reset the sale
+    function resetSale() {
+        // Clear all rows from the table
+        saleProductsTableBody.innerHTML = '';
+        
+        // Reset the receipt
+        const receiptContainer = document.querySelector('.card-body .container .row');
+        const existingProducts = receiptContainer.querySelectorAll('.product-entry');
+        existingProducts.forEach(entry => entry.remove());
+
+        // Reset all totals
+        document.querySelector('.tax').textContent = 'Tax: GH₵ 0.00';
+        document.querySelector('.discount').textContent = 'Discount: GH₵ 0.00';
+        document.querySelector('.subTotal').textContent = 'Sub Total: GH₵ 0.00';
+        document.querySelector('.total').textContent = 'Total: GH₵ 0.00';
+
+        // Reset item count
+        itemCountElement.textContent = '0 items';
+
+        // Clear search input
+        productSearchInput.value = '';
+
+        // Update pause button states
+        updatePauseButtonState();
+
+        // Show success message using Bootstrap toast
+        const toastHTML = `
+            <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+                <div id="resetSuccessToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header bg-success text-white">
+                        <strong class="me-auto">Success</strong>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body">
+                        Sale has been reset successfully.
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        if (!document.getElementById('resetSuccessToast')) {
+            document.body.insertAdjacentHTML('beforeend', toastHTML);
+        }
+        
+        const resetSuccessToast = new bootstrap.Toast(document.getElementById('resetSuccessToast'));
+        resetSuccessToast.show();
+    }
+
+    // Add click event listener to reset button
+    resetSaleButton.addEventListener('click', () => {
+        // Only show confirmation if there are items in the table
+        if (saleProductsTableBody.querySelectorAll('tr').length > 0) {
+            resetConfirmationModal.show();
+        }
+    });
+
+    // Add click event listener to confirm reset button
+    document.getElementById('confirmResetBtn').addEventListener('click', () => {
+        resetSale();
+        resetConfirmationModal.hide();
+    });
+
+     
+    function updateButtonStates() {
+      const hasRows = saleProductsTableBody.querySelectorAll('tr').length > 0;
+      
+      // Update Complete Sale button
+      if (!hasRows) {
+          completeSaleButton.classList.add('disabled');
+          completeSaleButton.style.opacity = '0.5';
+          completeSaleButton.style.cursor = 'not-allowed';
+          const completeIconContainer = completeSaleButton.querySelector('.rounded-circle');
+          if (completeIconContainer) {
+              completeIconContainer.classList.remove('bg-success');
+              completeIconContainer.classList.add('bg-secondary');
+          }
+      } else {
+          completeSaleButton.classList.remove('disabled');
+          completeSaleButton.style.opacity = '1';
+          completeSaleButton.style.cursor = 'pointer';
+          const completeIconContainer = completeSaleButton.querySelector('.rounded-circle');
+          if (completeIconContainer) {
+              completeIconContainer.classList.remove('bg-secondary');
+              completeIconContainer.classList.add('bg-success');
+          }
+      }
+
+      // Update Pause Sale buttons
+      pauseSaleButtons.forEach(button => {
+          if (!hasRows) {
+              button.classList.add('disabled');
+              button.style.opacity = '0.5';
+              button.style.cursor = 'not-allowed';
+              const iconContainer = button.querySelector('.rounded-circle');
+              if (iconContainer) {
+                  iconContainer.classList.remove('bg-warning', 'bg-danger');
+                  iconContainer.classList.add('bg-secondary');
+              }
+          } else {
+              button.classList.remove('disabled');
+              button.style.opacity = '1';
+              button.style.cursor = 'pointer';
+              const iconContainer = button.querySelector('.rounded-circle');
+              if (iconContainer) {
+                  if (button === pauseSaleButtons[0]) {
+                      iconContainer.classList.remove('bg-secondary');
+                      iconContainer.classList.add('bg-warning');
+                  } else {
+                      iconContainer.classList.remove('bg-secondary');
+                      iconContainer.classList.add('bg-danger');
+                  }
+              }
+          }
+      });
+
+      // Update Reset Sale button
+      if (!hasRows) {
+          resetSaleButton.classList.add('disabled');
+          resetSaleButton.style.opacity = '0.5';
+          resetSaleButton.style.cursor = 'not-allowed';
+          const resetIconContainer = resetSaleButton.querySelector('.rounded-circle');
+          if (resetIconContainer) {
+              resetIconContainer.classList.remove('bg-danger');
+              resetIconContainer.classList.add('bg-secondary');
+          }
+      } else {
+          resetSaleButton.classList.remove('disabled');
+          resetSaleButton.style.opacity = '1';
+          resetSaleButton.style.cursor = 'pointer';
+          const resetIconContainer = resetSaleButton.querySelector('.rounded-circle');
+          if (resetIconContainer) {
+              resetIconContainer.classList.remove('bg-secondary');
+              resetIconContainer.classList.add('bg-danger');
+          }
+      }
+  }
+
+  // Call updateButtonStates initially
+  updateButtonStates();
+
+    // Function to update receipt
+    function updateReceipt() {
+        const receiptContainer = document.querySelector('.card-body .container .row');
+        let subtotal = 0;
+        const tax = 0; // You can modify this as needed
+        const discount = 0; // You can modify this as needed
+
+        // Clear existing product entries
+        const existingProducts = receiptContainer.querySelectorAll('.product-entry');
+        existingProducts.forEach(entry => entry.remove());
+
+        // Get all products from the table
+        const rows = saleProductsTableBody.querySelectorAll('tr');
+        
+        rows.forEach(row => {
+            const name = row.cells[0].textContent;
+            const unitPrice = parseFloat(row.cells[1].textContent);
+            const bulkPrice = parseFloat(row.cells[2].textContent);
+            const quantity = parseFloat(row.querySelector('input[type="text"]').value) || 0;
+            const saleType = row.querySelector('input[type="radio"]:checked').value;
+            
+            // Skip products with zero quantity
+            if (quantity === 0) {
+                return;
+            }
+
+            // Calculate line total
+            const price = saleType === 'Unit' ? unitPrice : bulkPrice;
+            const lineTotal = price * quantity;
+            subtotal += lineTotal;
+
+            // Create product entry in receipt
+            const productEntry = `
+                
+            <div class="product-entry row w-full p-0 ">
+                    
+  <div class="col-7 text-start   " >
+           <p class="" style="font-size: 14px;">${name} (${saleType})  ${quantity} 
+            
+           </p>
+         </div>
+         <div class="col-5 text-end p-0">
+          
+          <p class="float-end text-end w-100 p-0" style="font-size: 14px; text-align: end; ">
+    GH₵${lineTotal.toFixed(2)}
+</p>
+         </div>
+       </div>
+            `;
+
+            // Insert before the tax/total section
+            receiptContainer.insertAdjacentHTML('beforeend', productEntry);
+        });
+
+        // Update totals
+        const total = subtotal + tax - discount;
+        
+        // Update the summary amounts
+        document.querySelector('.tax').textContent = `Tax:GH₵ ${tax.toFixed(2)}`;
+        document.querySelector('.discount').textContent = `Discount:GH₵ ${discount.toFixed(2)}`;
+        document.querySelector('.subTotal').textContent = `Sub Total:GH₵ ${subtotal.toFixed(2)}`;
+        document.querySelector('.total').textContent = `Total:GH₵ ${total.toFixed(2)}`;
+
+        // Update item count to show only non-zero quantity items
+        const activeItems = Array.from(rows).filter(row => {
+            const quantity = parseFloat(row.querySelector('input[type="text"]').value) || 0;
+            return quantity > 0;
+        }).length;
+        itemCountElement.textContent = `${activeItems} items`;
+
+
+        updateButtonStates();
+
+    }
+
+    // Modify the existing form submit handler to include receipt update
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const formData = new FormData(form);
+
+        fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+            },
+            body: formData,
+        })
+        .then(response => {
+            if (!response.ok) {
+                if (response.status === 400) {
+                    noName.show();
+                } else if (response.status === 404) {
+                    notFound.show();
+                }
+            }
+            return response.json();
+        })
+        .then(data => {
+            data.products.forEach(product => {
+                const existingRow = saleProductsTableBody.querySelector(`[data-id="${product.id}"]`);
+                
+                if (!existingRow) {
+                    const productRow = `
+                        <tr data-id="${product.id}">
+                            <td>${product.name}</td>
+                            <td>${product.unit_cost_price}</td>
+                            <td>${product.bulk_cost_price}</td>
+                            <td>${product.available_quantity}</td>
+                            <td>
+                                <div class="selectgroup w-100">
+                                    <label class="selectgroup-item">
+                                        <input type="radio" name="value-${product.id}" value="Unit" class="selectgroup-input sale-type" checked="">
+                                        <span class="selectgroup-button">Unit</span>
+                                    </label>
+                                    <label class="selectgroup-item">
+                                        <input type="radio" name="value-${product.id}" value="bulk" class="selectgroup-input sale-type">
+                                        <span class="selectgroup-button">Bulk</span>
+                                    </label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="input-group " style="width:200px;">
+                                    <span class="input-group-text text-danger decrease-quantity">
+                                        <i class="fas fa-minus-circle"></i>
+                                    </span>
+                                    <input type="text" class="form-control quantity-input" value="1">
+                                    <span class="input-group-text text-primary increase-quantity">
+                                        <i class="fas fa-plus-circle"></i>
+                                    </span>
+                                </div>
+                            </td>
+                            <td>
+                              <i class=" text-danger fas fa-trash-alt delete-row "></i>
+                            </td>
+                        </tr>`;
+                    saleProductsTableBody.insertAdjacentHTML('beforeend', productRow);
+                    
+                    // Add event listeners to the new row
+                    const newRow = saleProductsTableBody.lastElementChild;
+                    addRowEventListeners(newRow);
+                } else {
+                    alreadyExist.show();
+                }
+            });
+
+            productSearchInput.value = '';
+            updateReceipt();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+
+    function deleteRow(row) {
+      row.remove();
+      updateReceipt();
+  }
+
+    // Function to add event listeners to a row
+    function addRowEventListeners(row) {
+        const quantityInput = row.querySelector('.quantity-input');
+        const decreaseBtn = row.querySelector('.decrease-quantity');
+        const increaseBtn = row.querySelector('.increase-quantity');
+        const saleTypeInputs = row.querySelectorAll('.sale-type');
+        const deleteBtn = row.querySelector('.delete-row');
+
+        deleteBtn.addEventListener('click', () => {
+          deleteRow(row);
+      });
+
+
+        // Quantity change handlers
+        decreaseBtn.addEventListener('click', () => {
+            const currentValue = parseInt(quantityInput.value) || 0;
+            if (currentValue > 0) {
+                quantityInput.value = currentValue - 1;
+                updateReceipt();
+            }
+        });
+
+        increaseBtn.addEventListener('click', () => {
+            const currentValue = parseInt(quantityInput.value) || 0;
+            const maxQuantity = parseInt(row.cells[3].textContent);
+            if (currentValue < maxQuantity) {
+                quantityInput.value = currentValue + 1;
+                updateReceipt();
+            }
+        });
+
+        quantityInput.addEventListener('change', () => {
+            const value = parseInt(quantityInput.value) || 0;
+            const maxQuantity = parseInt(row.cells[3].textContent);
+            quantityInput.value = Math.min(Math.max(0, value), maxQuantity);
+            updateReceipt();
+        });
+
+        // Sale type change handler
+        saleTypeInputs.forEach(input => {
+            input.addEventListener('change', () => {
+                updateReceipt();
+            });
+        });
+    }
+});
+
+</script>
+
+<style>
+ 
+  #sale-products-table {
+    width: 100%;
+    text-align: left; /* Aligns text to the left in all table cells */
+}
+
+#sale-products-table th,
+#sale-products-table td {
+    text-align: left; /* Aligns both headers and table data to the left */
+}
+
+
+
+
+
+  #product-search {
+    width: 100%; /* Ensure input takes up 100% width */
+    padding-left: 40px; /* Space for the search icon */
+    border-radius: 4px; /* Rounded corners */
+}
+.twitter-typeahead{
+  width: 100%
+}
+  /* Dropdown menu container */
+.tt-menu {
+  background-color: #fff; /* White background */
+  border: 1px solid #ddd; /* Light gray border */
+  border-radius: 4px; /* Rounded corners */
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Slight shadow */
+  padding: 5px; /* Space inside */
+  width: 100%; /* Match the width of the input */
+  max-height: 200px; /* Limit the height */
+  overflow-y: auto; /* Enable scrolling if content is too tall */
+  z-index: 1000; /* Ensure it appears above other elements */
+}
+.tt-hint{
+  padding-left: 2.8rem
+
+}
+
+/* Individual suggestion items */
+.tt-suggestion {
+  padding: 10px; /* Space around each item */
+  cursor: pointer; /* Pointer cursor on hover */
+  color: #333; /* Dark text color */
+  font-size: 14px; /* Font size */
+}
+
+/* Hover effect for suggestions */
+.tt-suggestion:hover {
+  background-color: #f8f9fa; /* Light gray background */
+  color: #007bff; /* Change text color to blue */
+}
+
+/* Highlight matched text */
+.tt-highlight {
+  font-weight: bold; /* Make it bold */
+  color: #0a58ca; /* Orange color for emphasis */
+}
+
+/* Selected suggestion styling */
+.tt-selectable.tt-cursor {
+  background-color: #007bff; /* Blue background */
+  color: #fff; /* White text */
+}
+
+/* Apply styles only to the specific container with class 'custom-scrollbar' */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;  /* Width of the vertical scrollbar */
+  height: 12px; /* Height of the horizontal scrollbar */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f0f0f0; /* Light gray background for the track */
+  border-radius: 10px;  /* Rounded corners for the track */
+  border: 2px solid #e0e0e0; /* Optional: add a border around the track */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #888; /* Gray color for the thumb */
+  border-radius: 10px;  /* Rounded corners for the thumb */
+  border: 2px solid #f0f0f0; /* Optional: add spacing between thumb and track */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #555; /* Darker color when hovered */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:active {
+  background: #333; /* Even darker when clicked */
+}
+
+.custom-scrollbar::-webkit-scrollbar-button {
+  background-color: #888;
+  border-radius: 5px;
+  display:none;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:active {
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5); /* Subtle shadow effect */
+}
+
+</style>
+
+
+{% endblock %}

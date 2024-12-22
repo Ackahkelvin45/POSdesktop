@@ -7,10 +7,12 @@ class InventoryLog(models.Model):
         ('add', 'Stock Added'),
         ('remove', 'Stock Removed'),
         ('sale', 'Product Sold'),
+        ("updated manually(add)","Stock Added manually"),
+        ("updated manually(remove)","Stock Removed manually")
     ]
 
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='inventory_logs', help_text="The product for which the stock change is recorded.")
-    action = models.CharField(max_length=10, choices=ACTION_CHOICES, help_text="The type of action (add, remove, adjust, sale)")
+    action = models.CharField(max_length=30, choices=ACTION_CHOICES, help_text="The type of action (add, remove, adjust, sale)")
     quantity = models.PositiveIntegerField(help_text="The quantity of product added, removed, or sold")
     previous_quantity = models.PositiveIntegerField(help_text="The stock quantity before this action was performed", blank=True, null=True)
     new_quantity = models.PositiveIntegerField(help_text="The stock quantity after this action was performed", blank=True, null=True)
@@ -47,23 +49,36 @@ class InventoryLog(models.Model):
         # After saving the log, update the product's available quantity
         product.available_quantity = self.new_quantity
         product.save()
-
+    def save_default(self, *args, **kwargs):
+        """
+        Save method that uses the default save function without custom logic.
+        """
+        super(InventoryLog, self).save(*args, **kwargs)
     def reverse_action(self):
         """
         Undo this log's action and delete the log.
         """
         product = self.product
-
-        # Revert the product's available quantity
-        if self.action == 'add':
-            product.available_quantity -= self.quantity
-        elif self.action == 'remove':
-            product.available_quantity += self.quantity
-        elif self.action == 'sale':
-            product.available_quantity += self.quantity
+        product.set_reversing_available_quantity(True)
+        try:
+            # Revert the product's available quantity
+            if self.action == 'add':
+                product.available_quantity -= self.quantity
+            elif self.action == 'remove':
+                product.available_quantity += self.quantity
+            elif self.action == 'sale':
+                product.available_quantity += self.quantity
+            elif self.action == 'updated manually(add)':
+                product.available_quantity -= self.quantity
+            elif self.action == 'updated manually(remove)':
+                product.available_quantity += self.quantity
+            product.save()
+        finally:
+            product.set_reversing_available_quantity(False)
+        
         
         # Save the updated product quantity
-        product.save()
+       
 
         # Delete this log
         self.delete()

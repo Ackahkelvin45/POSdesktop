@@ -5,14 +5,15 @@ from authentication.models import CustomUser
 from django.contrib.auth.models import Permission
 
 class UserCreationForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}))
-    confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control','required':True}), required=True )
+    confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}) ,required=True )
 
     class Meta:
         model = CustomUser
         fields = ['email', 'first_name', 'last_name', 'password', 'role']
         widgets = {
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
+
             'first_name': forms.TextInput(attrs={'class': 'form-control'}),
             'last_name': forms.TextInput(attrs={'class': 'form-control'}),
             'role': forms.Select(attrs={'class': 'form-control form-select form-control-lg'}),

@@ -1,6 +1,6 @@
 {% extends "pos/layout.html" %}
 
-{% block title %}Userslist{% endblock %}
+{% block title %}Add Product Category{% endblock %}
 
 {% block content %}
 <div class="container">
@@ -17,13 +17,13 @@
             <i class="icon-arrow-right"></i>
           </li>
           <li class="nav-item">
-            <a href="{%  url 'dashboard:dashboardpage'%}">home</a>
+            <a href="{% url 'dashboard:dashboardpage' %}">Home</a>
           </li>
           <li class="separator">
             <i class="icon-arrow-right"></i>
           </li>
           <li class="nav-item">
-            <a href="#">add user</a>
+            <a href="#">Add Product Category</a>
           </li>
         </ul>
       </div>
@@ -31,13 +31,13 @@
       <div class="row">
         <div class="col-md-12">
           <div class="card">
-            <form method="post" action="{% url 'product:addcategory'%}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}">
+            <form method="post" action="{% url 'product:addcategory' %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}" id="categoryForm" novalidate>
             <div class="card-header">
               <div class="card-title">Add Product Category</div>
             </div>
             <div class="card-body">
                 {% if messages %}
-                <div class="alert alert-danger  alert-dismissible fade show">
+                <div class="alert alert-danger alert-dismissible fade show">
                   {% for message in messages %}
                     <p>{{ message }}</p>
                   {% endfor %}
@@ -46,37 +46,45 @@
               {% endif %}
               <div class="row">
                 <div class="col-md-6">
-                    {%csrf_token%}
+                    {% csrf_token %}
                     <div class="form-group">
-                        <label for="first_name">Name</label>
-                     {{form.name}}
-                      
-                      </div>
-                      <div class="form-group">
-                        <label for="first_name">Description</label>
-                     {{form.description}}
-                      
-                      </div>
-                
-               
+                        <label for="name">Name</label>
+                        {{ form.name }}
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        {{ form.description }}
+                    </div>
                 </div>
-                
-              
               </div>
             </div>
             <div class="card-action">
               <button type="submit" class="btn btn-primary">Save</button>
             </div>
-        </form>
+            </form>
           </div>
         </div>
       </div>
     </div>
-  </div>
+</div>
 
-
-
-
-     
+<script>
+  // JavaScript for form validation
+  (function () {
+    'use strict'
+    window.addEventListener('load', function () {
+      var form = document.getElementById('categoryForm')
+      form.addEventListener('submit', function (event) {
+        // Check validity of the form before submitting
+        if (form.checkValidity() === false) {
+          event.preventDefault()
+          event.stopPropagation()
+        }
+        // Add Bootstrap validation class to show validation feedback
+        form.classList.add('was-validated')
+      }, false)
+    }, false)
+  })()
+</script>
 
 {% endblock %}

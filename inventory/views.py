@@ -9,9 +9,10 @@ from product.models import Product
 from django.views.generic.base import View
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 
-class CreateInventoryLogView(FormView):
+class CreateInventoryLogView(LoginRequiredMixin,FormView):
     template_name = "inventory/addinventory.html"
     form_class = InventoryLogForm
     success_url = reverse_lazy("inventory:inventorylist")  # Adjust to your URL name for the inventory log list
@@ -30,9 +31,8 @@ class CreateInventoryLogView(FormView):
         return super().form_invalid(form)
 
 
-from django.views.generic.list import ListView
 
-class IventoryLogListView(ListView):
+class IventoryLogListView(LoginRequiredMixin,ListView):
     model = InventoryLog
     template_name = 'inventory/invemtorylist.html'
     context_object_name = 'inventory'
@@ -48,7 +48,7 @@ class IventoryLogListView(ListView):
 
 
 
-class ProductQuantityView(View):
+class ProductQuantityView(LoginRequiredMixin,View):
     def get(self, request, product_id):
         try:
             product = Product.objects.get(id=product_id)
@@ -57,7 +57,7 @@ class ProductQuantityView(View):
             return JsonResponse({'success': False, 'message': 'Product not found'})
 
 
-class EditInventoryLogView(UpdateView):
+class EditInventoryLogView(LoginRequiredMixin,UpdateView):
     model = InventoryLog
     template_name = "inventory/editinventorylog.html"
     form_class = InventoryLogForm
@@ -86,7 +86,7 @@ class EditInventoryLogView(UpdateView):
     
     
 
-class UndoInventoryLogView(View):
+class UndoInventoryLogView(LoginRequiredMixin,View):
     def post(self, request, *args, **kwargs):
         # Get the inventory log by ID
         log_id = self.kwargs.get('pk')
@@ -94,9 +94,14 @@ class UndoInventoryLogView(View):
 
         # Check if it is the most recent log for this product
         most_recent_log = InventoryLog.objects.filter(product=log.product).order_by('-action_date').first()
+        product =Product.objects.get(id=most_recent_log.product.id)
         if log != most_recent_log:
             messages.error(request, "Only the most recent log can be undone.")
             return redirect(reverse_lazy('inventory:inventorylist'))
+        if log.new_quantity != product.available_quantity:
+            messages.error(request, "Changes have been made to the available quantity of the product, and as a result, the inventory log cannot be  reversed.")
+            return redirect(reverse_lazy('inventory:inventorylist'))
+            
 
         # Perform the reverse action
         try:

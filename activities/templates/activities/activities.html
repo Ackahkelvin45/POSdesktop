@@ -33,7 +33,7 @@
             <i class="icon-arrow-right"></i>
           </li>
           <li class="nav-item">
-            <a href="">category list</a>
+            <a href="">activitiy log</a>
           </li>
         </ul>
       </div>
@@ -53,21 +53,7 @@
 {% endif %}
                   
 
-                  <a href="{% url 'product:addcategory'%}" class="btn btn-primary btn-sm">
-                    <span class="btn-label">
-                      <i class="fa fa-plus"></i>
-                    </span>
-                    Add Category
-                  </a>
-
-               
                   
-                  <a href="{% url 'product:addproduct'%}" class="btn btn-primary btn-sm">
-                    <span class="btn-label">
-                      <i class="fa fa-plus"></i>
-                    </span>
-                    Add Product
-                  </a>
                   
 
                 </p>
@@ -75,41 +61,9 @@
              
           <div class="card">
             <div class="card-header d-flex flex-sm-row flex-column justify-content-between">
-              <h5 class="card-title">Product Category List</h5>
+              <h5 class="card-title">User Activities Log</h5>
               <div class=""> 
-                <nav class="d-flex  j">
-                  <ul class="list-unstyled d-flex flex-sm-row flex-column">
-                      <li class="menu-item">
-                        <a href="{% url 'product:exportexcel'%}" class="btn btn-label-success btn-round btn-sm">
-                  
-                          <span class="btn-label">
-                            <i class="fas fa-file-export"></i>
-                          </span>
-                          Export as csv
-                        </a>
-                      </li>
-                      <li class="menu-item">
-                        <a href="{% url 'product:exportpdf'%}" class="btn btn-label-info btn-round btn-sm">
-                  
-                          <span class="btn-label">
-                            <i class="fas fa-file-export"></i>
-                          </span>
-                          Export as pdf
-                        </a>
-                      </li>
-                      <li class="menu-item">
-                     
-                        <a id="delete-all-btn" class="btn btn-label-danger btn-round btn-sm" data-bs-toggle="modal" data-bs-target="#deleteAllModal">
-                          <span class="btn-label">
-                              <i class="fa fa-trash-alt"></i>
-                          </span>
-                          Delete All
-                      </a>
-                      </li>
-
-                  </ul>
-              </nav>
-
+               
                
 
                

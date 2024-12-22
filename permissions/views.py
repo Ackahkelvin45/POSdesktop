@@ -9,8 +9,9 @@ from django.shortcuts import redirect
 from django.contrib import messages
 from authentication.models import CustomUser
 from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin
 
-class GroupsAndPermissionsView(TemplateView):
+class GroupsAndPermissionsView(LoginRequiredMixin,TemplateView):
     template_name = "permissions/viewpermissions.html"
 
     def get_context_data(self, **kwargs):
@@ -34,7 +35,7 @@ class GroupsAndPermissionsView(TemplateView):
 
 
 
-class EditGroupPermissionsView(TemplateView):
+class EditGroupPermissionsView(LoginRequiredMixin,TemplateView):
     template_name = 'permissions/editpermissions.html'
 
     def get_context_data(self, **kwargs):
@@ -62,12 +63,14 @@ class EditGroupPermissionsView(TemplateView):
             'group': group,
             'all_app_labels': sorted(all_app_labels),  # Sort alphabetically for better UX
             'group_app_labels': group_app_labels,
+            
         })
         return context
 
     def post(self, request, *args, **kwargs):
         group = get_object_or_404(Group, pk=self.kwargs['pk'])
         selected_apps = request.POST.getlist('apps')
+        
 
         if not selected_apps:
             messages.error(request, "No apps were selected. Please select at least one app.")
@@ -75,6 +78,8 @@ class EditGroupPermissionsView(TemplateView):
 
         # Clear all current permissions
         group.permissions.clear()
+        group.name=request.POST.get('name')
+        group.save()
 
         # Add permissions for the selected app labels
         for app_label in selected_apps:
@@ -85,7 +90,7 @@ class EditGroupPermissionsView(TemplateView):
         return redirect('permissions:groups_permissions')
 
 
-class DeleteGroupView(DeleteView):
+class DeleteGroupView(LoginRequiredMixin,DeleteView):
     model = Group
     success_url = reverse_lazy('permissions:groups_permissions')
   
@@ -112,7 +117,7 @@ class DeleteGroupView(DeleteView):
     
 
 
-class AddGroupView(TemplateView):
+class AddGroupView(LoginRequiredMixin,TemplateView):
     template_name = "permissions/addgroup.html"
 
     def get_context_data(self, **kwargs):
