@@ -65,7 +65,12 @@
                                 </tr>
                             </thead>
                             <tbody id="sale-products-table-body" style="max-height: 300px; overflow-y: scroll; ">
-                                <!-- Add rows dynamically here or statically -->
+                            
+                            
+                            <!-- Your regular make sale form -->
+                            <div class="make-sale-form">
+                                <!-- Your existing form content -->
+                            </div>
                             </tbody>
                         </table>
                     </div>
@@ -134,7 +139,7 @@
                       <div  class="d-flex flex-row  w-100 ">
                         
                         <div class="d-flex flex-column border-end border-bottom  w-50 border  p-2 justify-content-center align-items-center">
-                          <div style="width:50px;height:50px" class="bg-warning rounded-circle d-flex justify-content-center align-items-center text-white">
+                          <div style="width:50px;height:50px"  id="pausesale" class="bg-warning rounded-circle d-flex justify-content-center align-items-center text-white">
                             <i class="fas fa-pause fs-4"></i>
                             
                           </div>
@@ -142,7 +147,7 @@
                         </div>
                         
                         <div class="d-flex  w-50 flex-column border-end border-bottom  border  p-2 justify-content-center align-items-center">
-                          <div style="width:50px;height:50px" class="bg-success rounded-circle d-flex justify-content-center align-items-center text-white">
+                          <div style="width:50px;height:50px" id="complete" class="bg-success rounded-circle d-flex justify-content-center align-items-center text-white">
                             <i class="fas fa-check fs-4"></i>
                             
                           </div>
@@ -161,11 +166,7 @@
                           </div>
                           
                           <div class="d-flex  w-50 flex-column border-end border-bottom  border  p-2 justify-content-center align-items-center">
-                            <div style="width:50px;height:50px" class="bg-danger rounded-circle d-flex justify-content-center align-items-center text-white">
-                              <i class="fas fa-pause fs-4"></i>
-                              
-                            </div>
-                            <span>Pause Sale</span>
+                           
                           </div>
                             
                           </div>
@@ -300,30 +301,45 @@ datetimeInput.addEventListener('change', function() {
   $(document).ready(function () {
       // Initialize Typeahead for product search
       var products = new Bloodhound({
-          datumTokenizer: Bloodhound.tokenizers.obj.whitespace('text'), // Tokenize by 'text' property
-          queryTokenizer: Bloodhound.tokenizers.whitespace,
-          prefetch: {
-              url: "{% url 'sales:product_autocomplete' %}",
-              transform: function (response) { // Adjust transform based on server response
-                  return response.results; // Ensure `response.results` contains an array of objects
-              }
-          }
-      });
+        datumTokenizer: Bloodhound.tokenizers.obj.whitespace('text'),
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        remote: {  // Changed from prefetch to remote
+            url: "{% url 'sales:product_autocomplete' %}?q=%QUERY",
+            wildcard: '%QUERY',
+            transform: function(response) {
+                console.log('Search response:', response);
+                return response.results || [];
+            }
+        }
+    });
 
-      // Attach Typeahead to the input
-      $('#product-search').typeahead(
-          {
-              hint: true,
-              highlight: true,
-              minLength: 1,
-          },
-          {
-              name: 'products',
-              source: products,
-              display: 'text',  // 'text' will be used as the displayed product name in the input
-              limit: 10
-          }
-      );
+    // Initialize Bloodhound
+    products.initialize();
+
+    // Attach Typeahead to the input
+    $('#product-search').typeahead(
+        {
+            hint: true,
+            highlight: true,
+            minLength: 1,
+        },
+        {
+            name: 'products',
+            source: products,
+            display: 'text',
+            templates: {
+                suggestion: function(data) {
+                    return `
+                        <div class='w-100'>
+                            <strong>${data.text}</strong>
+                           
+                        </div>
+                    `;
+                },
+                empty: '<div>No matching products found</div>'
+            }
+        }
+    );
 
       const saleProducts = [];
 
@@ -339,9 +355,9 @@ datetimeInput.addEventListener('change', function() {
     const alreadyExist = new bootstrap.Modal(document.getElementById('alreadyExist'));
     const notFound = new bootstrap.Modal(document.getElementById('notFound'));
     const noName = new bootstrap.Modal(document.getElementById('noName'));
-    const pauseSaleButtons = document.querySelectorAll('.d-flex.flex-column.border-end.border-bottom.w-50.border.p-2:has(.fa-pause)');
+    const pauseSaleButtons = document.querySelectorAll("#pausesale");
     const resetSaleButton = document.querySelector('.bg-danger:has(.fa-undo)').closest('.d-flex');
-    const completeSaleButton = document.querySelector('.bg-success:has(.fa-check)').closest('.d-flex');
+    const completeSaleButton = document.querySelector('#complete').closest('.d-flex');
 
 
 
@@ -391,7 +407,7 @@ datetimeInput.addEventListener('change', function() {
         productSearchInput.value = '';
 
         // Update pause button states
-        updatePauseButtonState();
+        updateButtonStates()
 
         // Show success message using Bootstrap toast
         const toastHTML = `
@@ -584,136 +600,716 @@ datetimeInput.addEventListener('change', function() {
     }
 
     // Modify the existing form submit handler to include receipt update
-    form.addEventListener('submit', function (e) {
-        e.preventDefault();
-        const formData = new FormData(form);
+   // Modify the product row template to include units_per_bulk data attribute
+   function createProductRow(product) {
+    return `
+        <tr data-id="${product.id}" data-units-per-bulk="${product.units_per_bulk}">
+            <td>${product.name}</td>
+            <td>${product.unit_selling_price}</td>
+            <td>${product.bulk_selling_price}</td>
+            <td>${product.available_quantity}</td>
+            <td>
+                <div class="selectgroup w-100">
+                    <label class="selectgroup-item">
+                        <input type="radio" name="value-${product.id}" value="Unit" class="selectgroup-input sale-type" checked="">
+                        <span class="selectgroup-button">Unit</span>
+                    </label>
+                    <label class="selectgroup-item">
+                        <input type="radio" name="value-${product.id}" value="Bulk" class="selectgroup-input sale-type">
+                        <span class="selectgroup-button">Bulk</span>
+                    </label>
+                </div>
+            </td>
+            <td>
+                <div class="input-group" style="width:200px;">
+                    <span class="input-group-text text-danger decrease-quantity">
+                        <i class="fas fa-minus-circle"></i>
+                    </span>
+                    <input type="text" class="form-control quantity-input" value="1">
+                    <span class="input-group-text text-primary increase-quantity">
+                        <i class="fas fa-plus-circle"></i>
+                    </span>
+                </div>
+            </td>
+            <td>
+                <i class="text-danger fas fa-trash-alt delete-row"></i>
+            </td>
+        </tr>`;
+}
 
-        fetch(form.action, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
-            },
-            body: formData,
-        })
-        .then(response => {
-            if (!response.ok) {
-                if (response.status === 400) {
-                    noName.show();
-                } else if (response.status === 404) {
-                    notFound.show();
-                }
-            }
-            return response.json();
-        })
-        .then(data => {
-            data.products.forEach(product => {
-                const existingRow = saleProductsTableBody.querySelector(`[data-id="${product.id}"]`);
-                
-                if (!existingRow) {
-                    const productRow = `
-                        <tr data-id="${product.id}">
-                            <td>${product.name}</td>
-                            <td>${product.unit_cost_price}</td>
-                            <td>${product.bulk_cost_price}</td>
-                            <td>${product.available_quantity}</td>
-                            <td>
-                                <div class="selectgroup w-100">
-                                    <label class="selectgroup-item">
-                                        <input type="radio" name="value-${product.id}" value="Unit" class="selectgroup-input sale-type" checked="">
-                                        <span class="selectgroup-button">Unit</span>
-                                    </label>
-                                    <label class="selectgroup-item">
-                                        <input type="radio" name="value-${product.id}" value="bulk" class="selectgroup-input sale-type">
-                                        <span class="selectgroup-button">Bulk</span>
-                                    </label>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="input-group " style="width:200px;">
-                                    <span class="input-group-text text-danger decrease-quantity">
-                                        <i class="fas fa-minus-circle"></i>
-                                    </span>
-                                    <input type="text" class="form-control quantity-input" value="1">
-                                    <span class="input-group-text text-primary increase-quantity">
-                                        <i class="fas fa-plus-circle"></i>
-                                    </span>
-                                </div>
-                            </td>
-                            <td>
-                              <i class=" text-danger fas fa-trash-alt delete-row "></i>
-                            </td>
-                        </tr>`;
-                    saleProductsTableBody.insertAdjacentHTML('beforeend', productRow);
-                    
-                    // Add event listeners to the new row
-                    const newRow = saleProductsTableBody.lastElementChild;
-                    addRowEventListeners(newRow);
-                } else {
-                    alreadyExist.show();
-                }
-            });
 
-            productSearchInput.value = '';
-            updateReceipt();
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-    });
-
+    function validateBulkQuantity(row, requestedBulkQuantity) {
+      const availableQuantity = parseInt(row.cells[3].textContent);
+      const unitsPerBulk = parseInt(row.dataset.unitsPerBulk);
+      const totalUnitsNeeded = requestedBulkQuantity * unitsPerBulk;
+      
+      return {
+          isValid: totalUnitsNeeded <= availableQuantity,
+          maxBulkQuantity: Math.floor(availableQuantity / unitsPerBulk),
+          totalUnitsNeeded: totalUnitsNeeded
+      };
+  }
     function deleteRow(row) {
       row.remove();
       updateReceipt();
   }
 
     // Function to add event listeners to a row
-    function addRowEventListeners(row) {
-        const quantityInput = row.querySelector('.quantity-input');
-        const decreaseBtn = row.querySelector('.decrease-quantity');
-        const increaseBtn = row.querySelector('.increase-quantity');
-        const saleTypeInputs = row.querySelectorAll('.sale-type');
-        const deleteBtn = row.querySelector('.delete-row');
 
-        deleteBtn.addEventListener('click', () => {
-          deleteRow(row);
+    function addRowEventListeners(row) {
+      const quantityInput = row.querySelector('.quantity-input');
+      const decreaseBtn = row.querySelector('.decrease-quantity');
+      const increaseBtn = row.querySelector('.increase-quantity');
+      const saleTypeInputs = row.querySelectorAll('.sale-type');
+      const deleteBtn = row.querySelector('.delete-row');
+
+      function updateQuantity(newValue) {
+          const selectedSaleType = row.querySelector('.sale-type:checked').value;
+          const availableQuantity = parseInt(row.cells[3].textContent);
+          
+          if (selectedSaleType === 'bulk') {
+              const validation = validateBulkQuantity(row, newValue);
+              if (!validation.isValid) {
+                  showBulkQuantityError(validation.maxBulkQuantity, row.dataset.unitsPerBulk);
+                  newValue = validation.maxBulkQuantity;
+              }
+          } else {
+              newValue = Math.min(Math.max(0, newValue), availableQuantity);
+          }
+          
+          quantityInput.value = newValue;
+          updateReceipt();
+      }
+
+      decreaseBtn.addEventListener('click', () => {
+          const currentValue = parseInt(quantityInput.value) || 0;
+          if (currentValue > 0) {
+              updateQuantity(currentValue - 1);
+          }
       });
 
+      increaseBtn.addEventListener('click', () => {
+          const currentValue = parseInt(quantityInput.value) || 0;
+          updateQuantity(currentValue + 1);
+      });
 
-        // Quantity change handlers
-        decreaseBtn.addEventListener('click', () => {
-            const currentValue = parseInt(quantityInput.value) || 0;
-            if (currentValue > 0) {
-                quantityInput.value = currentValue - 1;
-                updateReceipt();
-            }
-        });
+      quantityInput.addEventListener('change', () => {
+          const value = parseInt(quantityInput.value) || 0;
+          updateQuantity(value);
+      });
 
-        increaseBtn.addEventListener('click', () => {
-            const currentValue = parseInt(quantityInput.value) || 0;
-            const maxQuantity = parseInt(row.cells[3].textContent);
-            if (currentValue < maxQuantity) {
-                quantityInput.value = currentValue + 1;
-                updateReceipt();
-            }
-        });
+      saleTypeInputs.forEach(input => {
+          input.addEventListener('change', () => {
+              const currentValue = parseInt(quantityInput.value) || 0;
+              updateQuantity(currentValue);
+          });
+      });
 
-        quantityInput.addEventListener('change', () => {
-            const value = parseInt(quantityInput.value) || 0;
-            const maxQuantity = parseInt(row.cells[3].textContent);
-            quantityInput.value = Math.min(Math.max(0, value), maxQuantity);
-            updateReceipt();
-        });
+      deleteBtn.addEventListener('click', () => {
+          deleteRow(row);
+      });
+  }
 
-        // Sale type change handler
-        saleTypeInputs.forEach(input => {
-            input.addEventListener('change', () => {
-                updateReceipt();
+  // Function to show bulk quantity error
+  function showBulkQuantityError(maxBulkQuantity, unitsPerBulk) {
+      const toastHTML = `
+          <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+              <div id="bulkQuantityErrorToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                  <div class="toast-header bg-danger text-white">
+                      <strong class="me-auto">Invalid Bulk Quantity</strong>
+                      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                  </div>
+                  <div class="toast-body">
+                      Maximum bulk quantity available is ${maxBulkQuantity} (${unitsPerBulk} units per bulk).
+                  </div>
+              </div>
+          </div>
+      `;
+      
+      if (!document.getElementById('bulkQuantityErrorToast')) {
+          document.body.insertAdjacentHTML('beforeend', toastHTML);
+      }
+      
+      const bulkQuantityErrorToast = new bootstrap.Toast(document.getElementById('bulkQuantityErrorToast'));
+      bulkQuantityErrorToast.show();
+  }
+
+  // Modify the form submit handler to include units_per_bulk
+  form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const formData = new FormData(form);
+
+      fetch(form.action, {
+          method: 'POST',
+          headers: {
+              'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+          },
+          body: formData,
+      })
+      .then(response => response.json())
+      .then(data => {
+          data.products.forEach(product => {
+              const existingRow = saleProductsTableBody.querySelector(`[data-id="${product.id}"]`);
+              
+              if (!existingRow) {
+                  const productRow = createProductRow(product);
+                  saleProductsTableBody.insertAdjacentHTML('beforeend', productRow);
+                  addRowEventListeners(saleProductsTableBody.lastElementChild);
+              } else {
+                  alreadyExist.show();
+              }
+          });
+
+          productSearchInput.value = '';
+          updateReceipt();
+      })
+      .catch(error => {
+          console.error('Error:', error);
+      });
+  });
+
+
+
+
+
+
+  
+  
+function collectSaleData() {
+    const saleProductsTableBody = document.querySelector('#sale-products-table-body');
+    const rows = saleProductsTableBody.querySelectorAll('tr');
+    const products = [];
+    let hasProducts = false;
+
+    rows.forEach(row => {
+        const quantity = parseInt(row.querySelector('.quantity-input').value) || 0;
+        if (quantity > 0) {
+            hasProducts = true;
+            products.push({
+                product_id: row.getAttribute('data-id'),
+                quantity: quantity,
+                sale_type: row.querySelector('input[type="radio"]:checked').value
             });
-        });
+        }
+    });
+
+    if (!hasProducts) {
+        return null;
     }
+
+    return {
+        products: products,
+        sale_date: document.getElementById('date').value
+    };
+}
+
+function pauseSale() {
+    const saleData = collectSaleData();
+    
+    if (!saleData) {
+        // Show error toast
+        const toastHTML = `
+            <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+                <div id="errorToast" class="toast" role="alert">
+                    <div class="toast-header bg-danger text-white">
+                        <strong class="me-auto">Error</strong>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                    </div>
+                    <div class="toast-body">
+                        Please add products to the sale before pausing.
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        if (!document.getElementById('errorToast')) {
+            document.body.insertAdjacentHTML('beforeend', toastHTML);
+        }
+        const errorToast = new bootstrap.Toast(document.getElementById('errorToast'));
+        errorToast.show();
+        return;
+    }
+
+    // Show loading spinner
+    const loadingToast = new bootstrap.Toast(createLoadingToast());
+    loadingToast.show();
+
+    fetch('{% url "sales:pause-sale" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        },
+        body: JSON.stringify(saleData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        loadingToast.hide();
+        if (data.status === 'success') {
+            showSuccessToast('Sale paused successfully');
+            // Reset the form after successful pause
+            resetSale();
+        } else {
+            showErrorToast(data.message || 'Failed to pause sale');
+        }
+    })
+    .catch(error => {
+        loadingToast.hide();
+        showErrorToast('An error occurred while pausing the sale');
+        console.error('Error:', error);
+    });
+}
+
+function createLoadingToast() {
+    const toastHTML = `
+        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+            <div id="loadingToast" class="toast" role="alert">
+                <div class="toast-header bg-info text-white">
+                    <strong class="me-auto">Processing</strong>
+                </div>
+                <div class="toast-body">
+                    <div class="d-flex align-items-center">
+                        <div class="spinner-border spinner-border-sm me-2" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        Pausing sale...
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    if (!document.getElementById('loadingToast')) {
+        document.body.insertAdjacentHTML('beforeend', toastHTML);
+    }
+    return document.getElementById('loadingToast');
+}
+
+function showSuccessToast(message) {
+    const toastHTML = `
+        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+            <div id="successToast" class="toast" role="alert">
+                <div class="toast-header bg-success text-white">
+                    <strong class="me-auto">Success</strong>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                </div>
+                <div class="toast-body">${message}</div>
+            </div>
+        </div>
+    `;
+    
+    if (!document.getElementById('successToast')) {
+        document.body.insertAdjacentHTML('beforeend', toastHTML);
+    }
+    const successToast = new bootstrap.Toast(document.getElementById('successToast'));
+    successToast.show();
+}
+
+function showErrorToast(message) {
+    const toastHTML = `
+        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+            <div id="errorToast" class="toast" role="alert">
+                <div class="toast-header bg-danger text-white">
+                    <strong class="me-auto">Error</strong>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                </div>
+                <div class="toast-body">${message}</div>
+            </div>
+        </div>
+    `;
+    
+    if (!document.getElementById('errorToast')) {
+        document.body.insertAdjacentHTML('beforeend', toastHTML);
+    }
+    const errorToast = new bootstrap.Toast(document.getElementById('errorToast'));
+    errorToast.show();
+}
+
+// Add click event listeners to both pause buttons
+pauseSaleButtons.forEach(button => {
+    button.addEventListener('click', pauseSale);
+});
+
+
+
+
+
+function showPaymentModal(saleData, totalAmount) {
+    const modalHTML = `
+        <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="paymentModalLabel">Payment Details</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="paymentForm">
+                            <div id="paymentError" class="alert alert-danger d-none">
+                                Amount paid must be equal to or greater than the total amount (GH₵${totalAmount.toFixed(2)})
+                            </div>
+                            <div class="mb-3">
+                                <label for="paymentType" class="form-label">Payment Type</label>
+                                <select class="form-select" id="paymentType" required>
+                                    <option value="Cash">Cash</option>
+                                    <option value="Mobile Money">Mobile Money</option>
+                                    <option value="Bank Transfer">Bank Transfer</option>
+                                    <option value="Card">Card</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="amountPaid" class="form-label">Amount Paid</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">GH₵</span>
+                                    <input type="number" class="form-control" id="amountPaid" 
+                                           step="0.01" min="0" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="balance" class="form-label">Balance</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">GH₵</span>
+                                    <input type="number" class="form-control" id="balance" 
+                                           readonly>
+                                </div>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    Complete Payment
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Remove existing modal if it exists
+    const existingModal = document.getElementById('paymentModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+
+    // Add modal to document
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    // Initialize modal
+    const paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
+    const amountPaidInput = document.getElementById('amountPaid');
+    const balanceInput = document.getElementById('balance');
+    const paymentError = document.getElementById('paymentError');
+
+    // Set initial balance
+    amountPaidInput.addEventListener('input', () => {
+        const amountPaid = parseFloat(amountPaidInput.value) || 0;
+        const balance = amountPaid - totalAmount;
+        balanceInput.value = balance.toFixed(2);
+        
+        // Hide error when user starts typing a new amount
+        paymentError.classList.add('d-none');
+    });
+
+    // Handle form submission
+    document.getElementById('paymentForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const paymentType = document.getElementById('paymentType').value;
+        const amountPaid = parseFloat(amountPaidInput.value);
+        const balance = parseFloat(balanceInput.value);
+
+        if (amountPaid < totalAmount) {
+            // Show error alert
+            paymentError.classList.remove('d-none');
+            // Optionally scroll to the error message
+            paymentError.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+            // Add payment details to sale data
+            saleData.payment_type = paymentType;
+            saleData.amount_paid = amountPaid;
+            saleData.balance = balance;
+
+            paymentModal.hide();
+            processSaleCompletion(saleData);
+        }
+    });
+
+    // Show the modal
+    paymentModal.show();
+}
+// Modified completeSale function
+
+function completeSale() {
+    const saleData = collectSaleData();
+    
+    if (!saleData) {
+        showErrorToast('Please add products to complete the sale.');
+        return;
+    }
+
+    // Add resumed sale ID if it exists
+    {% if resume_sale %}
+        saleData.resumed_sale_id = {{ resume_sale.id }};
+    {% endif %}
+
+    const totalElement = document.querySelector('.total');
+    const totalText = totalElement.textContent;
+    const totalAmount = parseFloat(totalText.replace(/[^0-9.-]+/g, ""));
+
+    showPaymentModal(saleData, totalAmount);
+}
+
+// Modified processSaleCompletion function
+function processSaleCompletion(saleData) {
+    const loadingToast = new bootstrap.Toast(createLoadingToast('Completing sale...'));
+    loadingToast.show();
+
+    // Validate data before sending
+    if (!saleData.products || !saleData.products.length) {
+        loadingToast.hide();
+        showErrorToast('No products added to sale');
+        return;
+    }
+
+    fetch('{% url "sales:completesale" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        },
+        body: JSON.stringify(saleData)
+    })
+    .then(async response => {
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.message || 'Server error occurred');
+        }
+        return data;
+    })
+    .then(data => {
+        loadingToast.hide();
+        if (data.status === 'success') {
+            showSuccessToast('Sale completed successfully');
+            resetSale();
+
+            if (data.auto_print && data.sale_id) {
+                const receiptUrl = `{% url 'sales:generate_receipt' 0 %}`.replace('0', data.sale_id);
+                window.open(receiptUrl, '_blank');
+            } else if (data.sale_id) {
+                showReceiptModal(parseInt(data.sale_id));
+            }
+        } else {
+            showErrorToast(data.message || 'Failed to complete sale');
+        }
+    })
+    .catch(error => {
+        loadingToast.hide();
+        showErrorToast(error.message || 'An error occurred while completing the sale');
+        console.error('Error:', error);
+    });
+}
+
+function showCompleteSaleModal(saleData) {
+    const confirmationModalHTML = `
+        <div class="modal fade" id="completeSaleModal" tabindex="-1" aria-labelledby="completeSaleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title" id="completeSaleModalLabel">Complete Sale</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to complete this sale?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-success" id="confirmCompleteSaleBtn">Complete Sale</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    if (!document.getElementById('completeSaleModal')) {
+        document.body.insertAdjacentHTML('beforeend', confirmationModalHTML);
+    }
+
+    const completeSaleModal = new bootstrap.Modal(document.getElementById('completeSaleModal'));
+    completeSaleModal.show();
+
+    document.getElementById('confirmCompleteSaleBtn').addEventListener('click', function() {
+        completeSaleModal.hide();
+        processSaleCompletion(saleData);
+    });
+}
+
+
+function showReceiptModal(saleId) {
+    const modalHTML = `
+        <div class="modal fade" id="receiptModal" tabindex="-1" aria-labelledby="receiptModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title" id="receiptModalLabel">Receipt Options</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Sale completed successfully! What would you like to do with the receipt?</p>
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-primary" id="viewReceiptBtn">
+                                <i class="fas fa-eye me-2"></i>View Receipt
+                            </button>
+                            <button type="button" class="btn btn-success" id="printReceiptBtn">
+                                <i class="fas fa-print me-2"></i>Print Receipt
+                            </button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="fas fa-times me-2"></i>Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Remove existing modal if it exists
+    const existingModal = document.getElementById('receiptModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+
+    // Add modal to document
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    // Initialize modal
+    const receiptModal = new bootstrap.Modal(document.getElementById('receiptModal'));
+
+    // Add event listeners
+    document.getElementById('viewReceiptBtn').addEventListener('click', () => {
+        const receiptUrl = `{% url 'sales:generate_receipt' 0 %}`.replace('0', saleId);
+        window.open(receiptUrl, '_blank');
+    });
+
+    document.getElementById('printReceiptBtn').addEventListener('click', () => {
+        const receiptUrl = `{% url 'sales:generate_receipt' 0 %}`.replace('0', saleId);
+        window.open(receiptUrl, '_blank');
+        receiptModal.hide();
+    });
+
+    // Show the modal
+    receiptModal.show();
+}
+
+// Add click event listener to complete sale button
+completeSaleButton.addEventListener('click', completeSale);
+});
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Fetch settings and handle date input
+    fetch('{% url "settings:get-settings" %}')
+    .then(response => response.json())
+    .then(settings => {
+        const dateInput = document.getElementById('date');
+        dateInput.disabled = !settings.change_date_sale;
+        if (!settings.change_date_sale) {
+            dateInput.classList.add('bg-light');
+            dateInput.title = 'Date changing is disabled in settings';
+        }
+    })
+    .catch(error => console.error('Error fetching settings:', error));
+});
+
+
+
+
+
+
+
+// Add this after your existing DOMContentLoaded event listener
+document.addEventListener('DOMContentLoaded', function() {
+    // Function to load paused sale data
+    function loadPausedSaleData(pausedItems, saleDate) {
+        // Set the date if it exists
+        if (saleDate) {
+            document.getElementById('date').value = saleDate;
+            // Trigger the date change event to update the receipt
+            const event = new Event('change');
+            document.getElementById('date').dispatchEvent(event);
+        }
+        
+        // Add each paused item to the sale
+        pausedItems.forEach(item => {
+            const productRow = createProductRow({
+                id: item.product.id,
+                name: item.product.name,
+                unit_selling_price: item.product.unit_selling_price,
+                bulk_selling_price: item.product.bulk_selling_price,
+                available_quantity: item.product.available_quantity,
+                units_per_bulk: item.product.units_per_bulk
+            });
+            
+            saleProductsTableBody.insertAdjacentHTML('beforeend', productRow);
+            const newRow = saleProductsTableBody.lastElementChild;
+            
+            // Set the quantity and sale type
+            const quantityInput = newRow.querySelector('.quantity-input');
+            const saleTypeInputs = newRow.querySelectorAll('.sale-type');
+            
+            quantityInput.value = item.quantity;
+            saleTypeInputs.forEach(input => {
+                if (input.value === item.sale_type) {
+                    input.checked = true;
+                }
+            });
+            
+            // Add event listeners to the new row
+            addRowEventListeners(newRow);
+        });
+        
+        // Update the receipt
+        updateReceipt();
+    }
+    
+    // Check if there's paused sale data in the context
+    {% if resume_sale %}
+        const pausedItems = {{ paused_items|safe }};
+        const saleDate = "{{ sale_date|date:'Y-m-d\TH:i' }}";
+        loadPausedSaleData(pausedItems, saleDate);
+    {% endif %}
+
+
+    // Add this after loading paused sale data
+{% if resume_sale %}
+const toastHTML = `
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        <div id="resumeSuccessToast" class="toast" role="alert">
+            <div class="toast-header bg-success text-white">
+                <strong class="me-auto">Success</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body">
+                Paused sale #{{ resume_sale.id }} loaded successfully.
+            </div>
+        </div>
+    </div>
+`;
+
+if (!document.getElementById('resumeSuccessToast')) {
+    document.body.insertAdjacentHTML('beforeend', toastHTML);
+}
+const resumeSuccessToast = new bootstrap.Toast(document.getElementById('resumeSuccessToast'));
+resumeSuccessToast.show();
+{% endif %}
 });
 
 </script>
+
+
+
+
+
+
 
 <style>
  

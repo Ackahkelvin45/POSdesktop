@@ -1,0 +1,92 @@
+<!-- templates/receipt.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            margin: 0;
+            padding: 0;
+            width: 80mm;
+        }
+        .receipt {
+            padding: 5mm;
+        }
+        .receipt-header, .receipt-footer {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .receipt-header h2 {
+            margin: 5px 0;
+        }
+        .receipt-details {
+            margin-bottom: 10px;
+        }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+        .table th, .table td {
+            text-align: left;
+            padding: 5px 0;
+            border-bottom: 1px dashed #000;
+        }
+        .table th {
+            font-weight: bold;
+        }
+        .total {
+            text-align: right;
+            font-size: 14px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="receipt">
+        <div class="receipt-header">
+            <h2>My Store</h2>
+            <p>123 Main St, City, Country</p>
+            <p>Tel: +123456789</p>
+        </div>
+
+        <div class="receipt-details">
+            <p>Date: {{ sale_date }}</p>
+            <p>Invoice: {{ invoice_number }}</p>
+        </div>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.quantity }}</td>
+                    <td>{{ product.price|floatformat:2 }}</td>
+                    <td>{{ product.total|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="total">
+            <p>Total: GH₵{{ total_amount|floatformat:2 }}</p>
+        </div>
+
+        <div class="receipt-footer">
+            <p>Thank you for your purchase!</p>
+        </div>
+    </div>
+</body>
+</html>

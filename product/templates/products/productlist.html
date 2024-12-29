@@ -193,6 +193,8 @@
                       <th>Category</th>
                       <th>Unit Selling Price (GH₵)</th>
                       <th>Bulk Selling Price (GH₵)</th>
+                      <th>Unit Products Per Bulk</th>
+
                       <th>Available Quantity</th>
                       <th>Action</th>
 
@@ -216,6 +218,8 @@
                         <td>{{ product.category.name }}</td>
                         <td>{{ product.unit_selling_price }}</td>
                         <td>{{ product.bulk_selling_price }}</td>
+                        <td>{{ product.units_per_bulk }}</td>
+
                         <td>{{ product.available_quantity }}</td>
                         <td>
                             <div class="d-flex ">
@@ -233,6 +237,8 @@
 
                                 data-product-bulk-selling-price="{{ product.bulk_selling_price }}"
                                 data-product-bulk-cost-price="{{ product.bulk_cost_price }}"
+                                data-product-units-per-bulk="{{ product.units_per_bulk}}"
+
 
                                 data-product-available-quantity="{{ product.available_quantity }}"
                                 data-product-category="{{ product.category.name }}"
@@ -317,6 +323,10 @@
                                 <input type="text" class="form-control" id="productBulkSellingPrice" readonly>
                             </div>
                             <div class="mb-3">
+                              <label for="productUnitsPerBulk" class="form-label"><strong>Units Per Bulk</strong></label>
+                              <input type="text" class="form-control" id="productUnitsPerBulk" readonly>
+                          </div>
+                            <div class="mb-3">
                                 <label for="productAvailableQuantity" class="form-label"><strong>Available Quantity</strong></label>
                                 <input type="text" class="form-control" id="productAvailableQuantity" readonly>
                             </div>
@@ -345,9 +355,13 @@
         const productBulkCostPrice = this.getAttribute('data-product-bulk-cost-price');
         const productAvailableQuantity = this.getAttribute('data-product-available-quantity');
         const productCategory = this.getAttribute('data-product-category');
+        const unitsPerBulk = this.getAttribute('data-product-units-per-bulk');
+
 
 
         document.getElementById('productName1').value = productName;
+        document.getElementById('productUnitsPerBulk').value = unitsPerBulk;
+
         document.getElementById('productCategory').value = productCategory;
         document.getElementById('productDescription').value = productDescription;
         document.getElementById('productUnitSellingPrice').value = productUnitSellingPrice;

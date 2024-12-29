@@ -45,7 +45,7 @@ class EditGroupPermissionsView(LoginRequiredMixin,TemplateView):
         group = get_object_or_404(Group, pk=self.kwargs['pk'])
 
         # Define apps to exclude
-        excluded_apps = {'admin', 'auth', 'authentication', 'contenttypes', 'sessions'}
+        excluded_apps = {'admin', 'auth', 'authentication', 'contenttypes', 'sessions','django_celery_beat','notifications',"settings"}
 
         # Get all unique app labels that have permissions, excluding certain apps
         all_app_labels = (
@@ -125,7 +125,7 @@ class AddGroupView(LoginRequiredMixin,TemplateView):
         context = super().get_context_data(**kwargs)
 
         # Define apps to exclude
-        excluded_apps = {'admin', 'auth', 'authentication', 'contenttypes', 'sessions'}
+        excluded_apps = {'admin', 'auth', 'authentication', 'contenttypes', 'sessions','django_celery_beat','notifications',"settings"}
 
         # Get all unique app labels that have permissions, excluding certain apps
         all_app_labels = (

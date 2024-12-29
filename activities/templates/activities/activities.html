@@ -90,7 +90,7 @@
                         <tr>
                             <td>{{ log.action }}</td>
                             <td>{{ log.user.first_name}}  {{ log.user.last_name}}({{ log.user.email}})</td>
-                            <td>{{ log.timestamp|date:"j M, Y, g:i a" }}</td>
+                            <td style="white-space: nowrap;">{{ log.timestamp|date:"j M, Y, g:i a" }}</td>
                             <td>{{ log.notes}}</td>
                         </tr>
                     {% empty %}

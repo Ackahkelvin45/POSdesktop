@@ -1,0 +1,332 @@
+{% extends "pos/layout.html" %}
+
+{% block title %}Userslist{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-inner">
+      <div class="page-header">
+        <ul class="breadcrumbs mb-3">
+          <li class="nav-home">
+            <a href="#">
+              <i class="icon-home"></i>
+            </a>
+          </li>
+          <li class="separator">
+            <i class="icon-arrow-right"></i>
+          </li>
+          <li class="nav-item">
+            <a href="{% url 'dashboard:dashboardpage' %}">home</a>
+          </li>
+          <li class="separator">
+            <i class="icon-arrow-right"></i>
+          </li>
+          <li class="nav-item">
+            <a href="">paused sale list</a>
+          </li>
+        </ul>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+            <div class="card-body">
+                <p class="demo">
+                  {% if messages %}
+  <div class="mt-4">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+                  
+
+                  <a href="{% url 'sales:addsale'%}" class="btn btn-primary btn-sm">
+                    <span class="btn-label">
+                      <i class="fa fa-plus"></i>
+                    </span>
+                    Make Sale
+                  </a>
+                
+
+
+               
+
+                </p>
+              </div>
+          <div class="card">
+          
+            <div class="card-header d-flex flex-sm-row flex-column justify-content-between">
+              <h5 class="card-title">Paused Sales List</h5>
+              <div class=""> 
+                <nav class="d-flex  j">
+                  <ul class="list-unstyled d-flex flex-sm-row flex-column">
+                   
+                     
+
+                  </ul>
+              </nav>
+
+               
+
+               
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table
+                  id="basic-datatables"
+                  class="display table table-striped table-hover"
+                >
+                  <thead>
+                    <tr>
+                      <th>Sale  Id </th>
+                      <th>Cashier Name</th>
+                      <th>Date</th>
+                      <th>Satus</th>
+
+                      <th>Products and Price</th>
+
+                      <th>Total Amount(GH₵)</th>
+
+                      <th>Actions</th>
+
+                      
+                    </tr>
+                  </thead>
+                 
+                    <tbody>
+                        {% for sale in paused_sales %}
+                        <tr>
+                            <td>{{ sale.sale_code }}</td>
+                            <td>{{ sale.cashier_name }}</td>
+                            <td style="white-space: nowrap;">{{ sale.created_at|date:"d M Y, H:i" }}</td>
+                            <td class="text-warning">{{ sale.status }}</td>
+                            <td>
+                            
+                               
+                                <button 
+                                type="button" 
+                                class="btn btn-info btn-sm" 
+                                data-bs-toggle="modal" 
+                                data-bs-target="#productsModal{{ sale.id }}">
+                                View Products
+                            </button>
+
+                          
+                            </td>
+                            <td>{{ sale.total_amount }}</td>
+                            <td>
+                                <div class="d-flex justify-content-center align-items-center">
+                                
+    
+                                <form id="delete-form-{{sale.id }}" method="POST" action="{% url 'sales:deletesale' sale.id %}">
+                                  {% csrf_token %}
+                              </form>
+                                
+
+                              <div>
+                                <a 
+                                  class="text-primary resume-sale-button" 
+                                  data-sale-id="{{ sale.id }}" 
+                                  data-sale-code="{{ sale.sale_code }}" 
+                                  data-bs-toggle="modal" 
+                                  data-bs-target="#resumeModal" 
+                                  style="cursor: pointer;" 
+                                  title="Resume Sale">
+                                  <i class="fas far fa-play-circle fs-5 mx-2"></i>
+                                </a>
+                              </div>
+                                   
+                                     
+                                    <a  class="delete-button text-danger" 
+                                    data-product-id="{{ sale.id }}" 
+                                    data-product-name="{{ sale.sale_code }}" 
+                                    style="cursor: pointer;" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#deleteModal">
+                                     <i  data-bs-toggle="tooltip" title="delete" class="fas fa-trash-alt"></i>
+                                 </a>
+                                    </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center">No paused sales found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <div class="modal fade" id="resumeModal" tabindex="-1" aria-labelledby="resumeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title" id="resumeModalLabel">Confirm Resume Sale</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to resume the sale with ID <strong id="resumeSaleId"></strong>?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" id="confirmResume" class="btn btn-sm btn-primary">Resume</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Handle Resume Sale button click
+      document.querySelectorAll('.resume-sale-button').forEach(button => {
+        button.addEventListener('click', function () {
+          // Get sale data
+          const saleId = this.getAttribute('data-sale-id');
+          const saleCode = this.getAttribute('data-sale-code');
+  
+          // Update modal content
+          document.getElementById('resumeSaleId').textContent = saleCode;
+  
+          // Store the sale ID in the confirmation button
+          document.getElementById('confirmResume').setAttribute('data-sale-id', saleId);
+        });
+      });
+  
+      // Handle Resume Sale confirmation
+      document.getElementById('confirmResume').addEventListener('click', function () {
+        const saleId = this.getAttribute('data-sale-id');
+  
+        // Redirect or make an AJAX request to resume the sale
+        window.location.href = `{% url 'sales:addsale' %}?resume=${saleId}`;
+      });
+    });
+  </script>
+  
+
+
+             
+  <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete thi ssale with id   <strong id="productName"></strong>?</p>
+                <p class="text-danger">This action cannot be undone!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-primary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" id="confirmDelete" class="btn btn-sm btn-danger">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+  
+  <script>
+      // Ensure modals work as intended
+      document.addEventListener('DOMContentLoaded', function () {
+          console.log("Modals initialized");
+      });
+    </script>
+
+    <script>
+        document.querySelectorAll('.delete-button').forEach(button => {
+          button.addEventListener('click', function () {
+              // Get product data from attributes
+              const productId = this.getAttribute('data-product-id');
+              const productName = this.getAttribute('data-product-name');
+      
+              // Update modal content
+              document.getElementById('productName').textContent = productName;
+      
+              // Set the ID of the form to submit
+              document.getElementById('confirmDelete').setAttribute('data-form-id', `delete-form-${productId}`);
+          });
+      });
+    
+        document.getElementById('confirmDelete').addEventListener('click', function () {
+          // Get the form ID from the data attribute
+          const formId = this.getAttribute('data-form-id');
+      
+          // Submit the corresponding form
+          const form = document.getElementById(formId);
+          if (form) {
+              form.submit();
+          }
+      });
+
+
+      
+      </script>
+     
+
+
+
+  {% for sale in paused_sales %}
+  <div 
+      class="modal fade" 
+      id="productsModal{{ sale.id }}" 
+      tabindex="-1" 
+      aria-labelledby="productsModalLabel{{ sale.id }}" 
+      aria-hidden="true">
+      <div class="modal-dialog modal-lg" >
+          <div class="modal-content">
+              <div class="modal-header">
+                  <h5 class="modal-title" id="productsModalLabel{{ sale.id }}">Products in Sale #{{ sale.sale_code }}</h5>
+                  <button 
+                      type="button" 
+                      class="btn-close" 
+                      data-bs-dismiss="modal" 
+                      aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                  <table class="table table-sm table-striped">
+                      <thead>
+                          <tr>
+                              <th>Product</th>
+                              <th>Quantity</th>
+                              <th>Sale Type</th>
+
+                              <th>Price</th>
+                              <th>Subtotal</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          {% for sale_product in sale.saleproduct_set.all %}
+                          <tr>
+                              <td>{{ sale_product.product.name }}</td>
+                              <td>{{ sale_product.quantity }}</td>
+                              <td>{{ sale_product.sale_type}}</td>
+
+                              <td>{{ sale_product.unit_price }}</td>
+                              <td>{{ sale_product.subtotal }}</td>
+                          </tr>
+                          {% endfor %}
+                      </tbody>
+                  </table>
+              </div>
+              <div class="modal-footer">
+                  <button 
+                      type="button" 
+                      class="btn btn-secondary" 
+                      data-bs-dismiss="modal">Close</button>
+              </div>
+          </div>
+      </div>
+  </div>
+  {% endfor %}
+  {% endblock %}

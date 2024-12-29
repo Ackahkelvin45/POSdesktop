@@ -52,6 +52,8 @@ INSTALLED_APPS = [
     'activities',
     'notifications',
     'sales',
+    'report',
+    "settings",
     
 ]
 
@@ -80,6 +82,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'pos.utils.context_processors.app_permissions', 
+
             ],
         },
     },

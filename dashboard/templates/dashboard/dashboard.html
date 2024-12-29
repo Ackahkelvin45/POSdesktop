@@ -1,17 +1,274 @@
 {% extends "pos/layout.html" %}
 
-{% block title %}Dashboard{% endblock %}
+{% block title %}Inventory List{% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="page-inner">
-    
-    </div>
+        <div class="page-header">
+        
+        </div>
+
+        <div class="d-flex flex-row justify-content-between">
+            <h5 class="card-title">Dashboard</h5>
+          
+        </div>
+
+        <div class="row mt-5">
+            <div class="col-sm-6 col-md-4">
+                <div class="card card-stats card-round">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-5">
+                                <div class="icon-big text-center">
+                                    <i id="sales-icon" class="fas fa-wallet text-success"></i>
+                                </div>
+                            </div>
+                            <div class="col-7 col-stats">
+                                <div class="numbers">
+                                    <p class="card-category">Daily Total Sales</p>
+                                    <h3 id="total-sales" class="card-title">0</h3>
+                                    <small id="sales-change" class="text-success d-flex justify-content-end">+20%</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-md-4">
+                <div class="card card-stats card-round">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-5">
+                                <div class="icon-big text-center">
+                                    <i id="profit-icon" class="fas fa-money-check-alt text-danger"></i>
+                                </div>
+                            </div>
+                            <div class="col-7 col-stats">
+                                <div class="numbers">
+                                    <p class="card-category">Daily Gross Profit</p>
+                                    <h3 id="total-profit" class="card-title">0</h3>
+                                    <small id="profit-change" class="text-danger d-flex justify-content-end">-20%</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-md-4">
+                <div class="card card-stats card-round">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-5">
+                                <div class="icon-big text-center">
+                                    <i id="sales-count-icon" class="fas fa-sort-numeric-up text-warning"></i>
+                                </div>
+                            </div>
+                            <div class="col-7 col-stats">
+                                <div class="numbers">
+                                    <p class="card-category">Daily  Sales Count</p>
+                                    <h4 id="total-sales-count" class="card-title">0</h4>
+                                    <small id="sales-count-change" class="text-warning d-flex justify-content-end">-20%</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+       
+
+        <!-- Daily Sales Chart -->
+<div class="w-100 card">
+  <div class="card-header"><h4>Daily Sales Trend</h4></div>
+  <div class="card-body">
+      <canvas id="dailySalesChart"></canvas>
   </div>
+</div>
+
+<!-- Weekly Sales Chart -->
+<div class="w-100 card mt-4">
+  <div class="card-header"><h4>Weekly Sales Trend</h4></div>
+  <div class="card-body">
+      <canvas id="weeklySalesChart"></canvas>
+  </div>
+</div>
 
 
 
+<!-- Top 10 Products Table -->
+ <div class="col-md-6">
+<div class="card mt-4">
+  <div class="card-header"><h5>Top 10  Selling products Products in 24 hrs</h5></div>
+  <div class="card-body">
+      <div class="table-responsive">
+          <table class="table align-items-center mb-0">
+              <thead class="thead-light">
+                  <tr>
+                      <th scope="col">#</th>
+                      <th scope="col">Product Name</th>
+                      <th scope="col" class="text-end">Total Sales ($)</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  {% for product in  top_selling_products %}
+                  <tr>
+                      <th scope="row">{{ forloop.counter }}</th>
+                      <td>{{ product.product__name }}</td>
+                      <td class="text-end">{{ product.total_quantity_sold|floatformat:0 }}</td>
+                  </tr>
+                  {% endfor %}
+              </tbody>
+          </table>
+      </div>
+  </div>
+</div>
 
-     
+</div>
+    <script>
+      // Prepare data for the daily sales chart
+      // Prepare data for the daily sales chart
+const dailySalesData = {
+  labels: [{% for entry in daily_sales_trend %}'',{% endfor %}],  // Sale IDs for the X-axis labels
+  datasets: [{
+      label: 'Total Sales',
+      data: [{% for entry in daily_sales_trend %}{{ entry.total_amount }},{% endfor %}],  // Total sales for each sale
+      borderColor: 'rgba(75, 192, 192, 1)',  // Line color
+      backgroundColor: 'rgba(75, 192, 192, 0.2)',  // Area under the line color
+      fill: true,  // This ensures the area under the line is filled with the color
+      tension: 0.1  // Smoothness of the line
+  }]
+};
 
+// Prepare data for the weekly sales chart
+const weeklySalesData = {
+  labels: [{% for entry in weekly_sales_trend %}'',{% endfor %}],  // Sale IDs for the X-axis labels
+  datasets: [{
+      label: 'Total Sales',
+      data: [{% for entry in weekly_sales_trend %}{{ entry.total_amount }},{% endfor %}],  // Total sales for each sale
+      borderColor: 'rgba(54, 162, 235, 1)',  // Line color for weekly chart
+      backgroundColor: 'rgba(54, 162, 235, 0.2)',  // Area under the line color for weekly chart
+      fill: true,  // This ensures the area under the line is filled with the color
+      tension: 0.1  // Smoothness of the line
+  }]
+};
+
+// Create the daily sales chart
+const ctx1 = document.getElementById('dailySalesChart').getContext('2d');
+const dailySalesChart = new Chart(ctx1, {
+  type: 'line',
+  data: dailySalesData,
+  options: {
+      scales: {
+          x: {
+              title: {
+                  display: false,  // Hides the title for the X-axis
+              }
+          },
+          y: {
+              title: {
+                  display: true,
+                  text: 'Total Sales'  // Label for the Y-axis
+              },
+              beginAtZero: true
+          }
+      }
+  }
+});
+
+// Create the weekly sales chart
+const ctx2 = document.getElementById('weeklySalesChart').getContext('2d');
+const weeklySalesChart = new Chart(ctx2, {
+  type: 'line',
+  data: weeklySalesData,
+  options: {
+      scales: {
+          x: {
+              title: {
+                  display: false,  // Hides the title for the X-axis
+              }
+          },
+          y: {
+              title: {
+                  display: true,
+                  text: 'Total Sales'  // Label for the Y-axis
+              },
+              beginAtZero: true
+          }
+      }
+  }
+});
+
+    </script>
+    
+    
+    <script>
+        
+        // Function to update the chart with new data
+        function updateChart() {
+           
+            const url = `{% url 'report:sales-data' %}?filter=day`;
+            fetch(url)
+                .then((response) => response.json())
+                .then((data) => {
+                    // Update chart data
+                   
+
+                    // Update total values and changes
+                    document.getElementById('total-sales').innerText = `GHS ${parseFloat(data.total_sales).toFixed(2)}`;
+                    document.getElementById('total-profit').innerText = `GHS ${parseFloat(data.total_profit).toFixed(2)}`;
+                    document.getElementById('total-sales-count').innerText = data.total_sales_count;
+                    document.getElementById('sales-change').innerText = data.sales_change;
+                    document.getElementById('profit-change').innerText = data.profit_change;
+                    document.getElementById('sales-count-change').innerText = data.sales_count_change;
+
+                    // Change icon color based on performance
+                    updateColor(data.sales_change, 'sales');
+                    updateColor(data.profit_change, 'profit');
+                    updateColor(data.sales_count_change, 'sales-count');
+                })
+                .catch((error) => console.error('Error fetching data:', error));
+        }
+
+        // Helper function to update the color of icons and text
+        function updateColor(change, type) {
+            let icon, textElement;
+            if (type === 'sales') {
+                icon = document.getElementById('sales-icon');
+                textElement = document.getElementById('sales-change');
+            } else if (type === 'profit') {
+                icon = document.getElementById('profit-icon');
+                textElement = document.getElementById('profit-change');
+            } else if (type === 'sales-count') {
+                icon = document.getElementById('sales-count-icon');
+                textElement = document.getElementById('sales-count-change');
+            }
+
+            // Set colors based on performance (positive or negative change)
+            if (change.includes('Increase')) {
+                icon.classList.add('text-success');
+                icon.classList.remove('text-danger', 'text-warning');
+                textElement.classList.add('text-success');
+                textElement.classList.remove('text-danger', 'text-warning');
+            } else if (change.includes('Decrease')) {
+                icon.classList.add('text-danger');
+                icon.classList.remove('text-success', 'text-warning');
+                textElement.classList.add('text-danger');
+                textElement.classList.remove('text-success', 'text-warning');
+            } else {
+                icon.classList.add('text-muted');
+                icon.classList.remove('text-success', 'text-danger', 'text-warning');
+                textElement.classList.add('text-muted');
+                textElement.classList.remove('text-success', 'text-danger', 'text-warning');
+            }
+        }
+
+        // Load chart data on page load
+        updateChart();
+    </script>
+</div>
 {% endblock %}

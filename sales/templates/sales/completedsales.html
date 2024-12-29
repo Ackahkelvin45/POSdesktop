@@ -1,0 +1,204 @@
+{% extends "pos/layout.html" %}
+
+{% block title %}Userslist{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-inner">
+      <div class="page-header">
+        <ul class="breadcrumbs mb-3">
+          <li class="nav-home">
+            <a href="#">
+              <i class="icon-home"></i>
+            </a>
+          </li>
+          <li class="separator">
+            <i class="icon-arrow-right"></i>
+          </li>
+          <li class="nav-item">
+            <a href="{% url 'dashboard:dashboardpage' %}">home</a>
+          </li>
+          <li class="separator">
+            <i class="icon-arrow-right"></i>
+          </li>
+          <li class="nav-item">
+            <a href="">completed sales list</a>
+          </li>
+        </ul>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+            <div class="card-body">
+                <p class="demo">
+                  {% if messages %}
+  <div class="mt-4">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+                  
+
+                  <a href="{% url 'sales:addsale'%}" class="btn btn-primary btn-sm">
+                    <span class="btn-label">
+                      <i class="fa fa-plus"></i>
+                    </span>
+                    Make Sale
+                  </a>
+                
+
+
+               
+
+                </p>
+              </div>
+          <div class="card">
+          
+            <div class="card-header d-flex flex-sm-row flex-column justify-content-between">
+              <h5 class="card-title">Completed Sales List</h5>
+              <div class=""> 
+                <nav class="d-flex  j">
+                  <ul class="list-unstyled d-flex flex-sm-row flex-column">
+                   
+                     
+
+                  </ul>
+              </nav>
+
+               
+
+               
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table
+                  id="basic-datatables"
+                  class="display table table-striped table-hover"
+                >
+                  <thead>
+                    <tr>
+                      <th>Sale  Id </th>
+                      <th>Cashier Name</th>
+                      <th>Date</th>
+                      <th>Satus</th>
+
+                      <th>Products and Price</th>
+
+                      <th>Total Amount</th>
+
+
+                      
+                    </tr>
+                  </thead>
+                 
+                    <tbody>
+                        {% for sale in completed_sales %}
+                        <tr>
+                            <td>{{ sale.sale_code }}</td>
+                            <td>{{ sale.cashier_name }}</td>
+                            <td style=" white-space: nowrap;">{{ sale.created_at|date:"d M Y, H:i" }}</td>
+                            <td class="text-success">{{ sale.status }}</td>
+                            <td>
+                            
+                               
+                                <button 
+                                type="button" 
+                                class="btn btn-info btn-sm" 
+                                data-bs-toggle="modal" 
+                                data-bs-target="#productsModal{{ sale.id }}">
+                                View Products
+                            </button>
+                            </td>
+                            <td>{{ sale.total_amount }}</td>
+                            
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">No paused sales found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+
+             
+
+  
+  <script>
+      // Ensure modals work as intended
+      document.addEventListener('DOMContentLoaded', function () {
+          console.log("Modals initialized");
+      });
+    </script>
+
+     
+
+
+
+  {% for sale in completed_sales %}
+  <div 
+      class="modal fade" 
+      id="productsModal{{ sale.id }}" 
+      tabindex="-1" 
+      aria-labelledby="productsModalLabel{{ sale.id }}" 
+      aria-hidden="true">
+      <div class="modal-dialog modal-lg" >
+          <div class="modal-content">
+              <div class="modal-header">
+                  <h5 class="modal-title" id="productsModalLabel{{ sale.id }}">Products in Sale #{{ sale.sale_code }}</h5>
+                  <button 
+                      type="button" 
+                      class="btn-close" 
+                      data-bs-dismiss="modal" 
+                      aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                  <table class="table table-sm table-striped">
+                      <thead>
+                          <tr>
+                              <th>Product</th>
+                              <th>Quantity</th>
+                              <th>Sale Type</th>
+
+                              <th>Price</th>
+                              <th>Subtotal</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          {% for sale_product in sale.saleproduct_set.all %}
+                          <tr>
+                              <td>{{ sale_product.product.name }}</td>
+                              <td>{{ sale_product.quantity }}</td>
+                              <td>{{ sale_product.sale_type}}</td>
+
+                              <td>{{ sale_product.unit_price }}</td>
+                              <td>{{ sale_product.subtotal }}</td>
+                          </tr>
+                          {% endfor %}
+                      </tbody>
+                  </table>
+              </div>
+              <div class="modal-footer">
+                  <button 
+                      type="button" 
+                      class="btn btn-secondary" 
+                      data-bs-dismiss="modal">Close</button>
+              </div>
+          </div>
+      </div>
+  </div>
+  {% endfor %}
+  {% endblock %}

@@ -1,0 +1,229 @@
+{% extends "pos/layout.html" %}
+
+{% block title %}Inventory List{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-inner">
+        <div class="page-header">
+            <ul class="breadcrumbs mb-3">
+                <li class="nav-home">
+                    <a href="#"><i class="icon-home"></i></a>
+                </li>
+                <li class="separator"><i class="icon-arrow-right"></i></li>
+                <li class="nav-item">
+                    <a href="{% url 'dashboard:dashboardpage' %}">home</a>
+                </li>
+                <li class="separator"><i class="icon-arrow-right"></i></li>
+                <li class="nav-item">
+                    <a href="#">Analytics</a>
+                </li>
+            </ul>
+        </div>
+        <div><h5 class="card-title">Analytics</h5></div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Inventory Demarcation</div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="donutChart" style="width: 50%; height: 50%"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>     
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Product Inventory Levels</div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="stockPieChart" style="width: 50%; height: 50%"></canvas>
+                        </div>
+                    </div>
+                </div>  
+            </div>    
+        </div>
+
+        <!-- Product Category Pie Chart -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Product Category Distribution</div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="categoryPieChart" style="width: 50%; height: 50%"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>     
+        </div>
+
+        <!-- Donut Chart: Stock Status -->
+        <script>
+            const ctx2 = document.getElementById('donutChart').getContext('2d');
+            const donutChart = new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: ['In Stock', 'Low Stock', 'Out of Stock'],
+                    datasets: [{
+                        data: [{{ stock_status.in_stock }}, {{ stock_status.low_stock }}, {{ stock_status.out_of_stock }}],
+                        backgroundColor: ['#36a2eb', '#ffcd56', '#ff6384'],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    legend: {
+                        position: "bottom",
+                        labels: {
+                            fontColor: "rgb(154, 154, 154)",
+                            fontSize: 11,
+                            usePointStyle: true,
+                            padding: 20,
+                        },
+                    },
+                    layout: {
+                        padding: {
+                            left: 20,
+                            right: 20,
+                            top: 20,
+                            bottom: 20,
+                        },
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return tooltipItem.label + ': ' + tooltipItem.raw + ' units';
+                            }
+                        }
+                    }
+                },
+            });
+        </script>
+
+        <!-- Stock Pie Chart -->
+        <script>
+            const ctx = document.getElementById('stockPieChart').getContext('2d');
+            const stockPieChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: {{ labels|safe }}, 
+                    datasets: [{
+                        label: 'Stock Levels',
+                        data: {{ quantities|safe }},
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.8)',
+                            'rgba(54, 162, 235, 0.8)',
+                            'rgba(255, 206, 86, 0.8)',
+                            'rgba(75, 192, 192, 0.8)',
+                            'rgba(153, 102, 255, 0.8)',
+                            'rgba(255, 159, 64, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    legend: {
+                        position: "bottom",
+                        labels: {
+                            fontColor: "rgb(154, 154, 154)",
+                            fontSize: 11,
+                            usePointStyle: true,
+                            padding: 20,
+                        },
+                    },
+                    layout: {
+                        padding: {
+                            left: 20,
+                            right: 20,
+                            top: 20,
+                            bottom: 20,
+                        },
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return tooltipItem.label + ': ' + tooltipItem.raw + ' units';
+                            }
+                        }
+                    }
+                },
+            });
+        </script>
+
+        <!-- Product Category Pie Chart -->
+        <script>
+            const ctx3 = document.getElementById('categoryPieChart').getContext('2d');
+            const categoryPieChart = new Chart(ctx3, {
+                type: 'doughnut',
+                data: {
+                    labels: {{ category_labels|safe }},
+                    datasets: [{
+                        label: 'Product Categories',
+                        data: {{ category_counts|safe }},
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.8)',
+                            'rgba(54, 162, 235, 0.8)',
+                            'rgba(255, 206, 86, 0.8)',
+                            'rgba(75, 192, 192, 0.8)',
+                            'rgba(153, 102, 255, 0.8)',
+                            'rgba(255, 159, 64, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    legend: {
+                        position: "bottom",
+                        labels: {
+                            fontColor: "rgb(154, 154, 154)",
+                            fontSize: 11,
+                            usePointStyle: true,
+                            padding: 20,
+                        },
+                    },
+                    layout: {
+                        padding: {
+                            left: 20,
+                            right: 20,
+                            top: 20,
+                            bottom: 20,
+                        },
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return tooltipItem.label + ': ' + tooltipItem.raw + ' products';
+                            }
+                        }
+                    }
+                },
+            });
+        </script>
+
+    </div>
+</div>
+{% endblock %}

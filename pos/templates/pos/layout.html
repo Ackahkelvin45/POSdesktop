@@ -14,6 +14,7 @@
       type="image/x-icon"
     />
     <script src="{% static 'assets/js/core/jquery-3.7.1.min.js' %}"></script>
+    <script src="{% static 'assets/js/plugin/chart.js/chart.min.js'%}"></script>
 
 
     <!-- Fonts and icons -->
@@ -105,6 +106,9 @@
                   <i class="fa fa-ellipsis-h"></i>
                 </span>
               </li>
+
+              {% if "product" in user_app_permissions %}
+
               <li class="nav-item">
                 <a data-bs-toggle="collapse" href="#base">
                   <i class="fas fa-layer-group"></i>
@@ -134,7 +138,9 @@
                 </div>
               </li>
 
+              {%endif%}
 
+              {% if "sales" in user_app_permissions %}
 
 
               <li class="nav-item">
@@ -153,21 +159,52 @@
                     </li>
                    
                     <li>
-                      <a href="#">
+                      <a href="{% url 'sales:pausedsales'%}">
                         <span class="sub-item">Paused sales</span>
+                      </a>
+                    </li>
+                    
+                    <li>
+                      <a href="{% url 'sales:completedsales'%}">
+                        <span class="sub-item">Completed sales</span>
                       </a>
                     </li>
                   </ul>
                 </div>
               </li>
 
+{%endif%}
+              <li class="nav-item ">
+                <a data-bs-toggle="collapse" href="#charts" class="">
+                  <i class="fas fa-chart-line"></i>
+                  <p>Report</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="charts" style="">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="{% url 'report:sales_summary_page'%}">
+                        <span class="sub-item">Sales report</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="{% url 'report:analytics'%}">
+                        <span class="sub-item">Analytics</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+
+              {% if "inventory" in user_app_permissions %}
+
               <li class="nav-item">
-                <a data-bs-toggle="collapse" href="#charts">
+                <a data-bs-toggle="collapse" href="#stock">
                   <i class="fas fa-file-invoice"></i>
                   <p>Inventory Log</p>
                   <span class="caret"></span>
                 </a>
-                <div class="collapse" id="charts">
+                <div class="collapse" id="stock">
                   <ul class="nav nav-collapse">
                     <li>
                       <a href='{% url "inventory:createinventorylog"%}'>
@@ -182,8 +219,9 @@
                   </ul>
                 </div>
               </li>
+              {%endif%}
+              {% if request.user.is_superuser %}
 
-             
               <li class="nav-item">
                 <a data-bs-toggle="collapse" href="#sidebarLayouts">
                   <i class="fas  fas fa-users"></i>
@@ -208,7 +246,7 @@
                   </ul>
                 </div>
               </li>
-            
+            {% endif%}
               
               <li class="nav-item">
                 <a data-bs-toggle="collapse" href="#maps">
@@ -232,20 +270,24 @@
                 </div>
               </li>
              
+              {% if "activities" in user_app_permissions%}
+
               <li class="nav-item">
                 <a href="{% url 'activities:global_activity_logs'%}">
                   <i class="fas fa-user-clock"></i>
                   <p>User Activity Log</p>
                 </a>
               </li>
+              {% endif%}
+              {% if request.user.is_superuser %}
+
               <li class="nav-item">
-                <a href="../../../documentation/index.html">
-                  <i class="fas fa-file"></i>
-                  <p>Documentation</p>
-                  <span class="badge badge-secondary">1</span>
-                </a>
+                <a href="{% url 'settings:edit_settings'%}">
+                  <i class="fas fa-cog"></i>
+                  <p>Settings</p>                </a>
               </li>
-              
+              {% endif%}
+
             </ul>
           </div>
         </div>
@@ -458,24 +500,24 @@
                               <span class="text">Activity Log</span>
                             </div>
                           </a>
-                          <a class="col-6 col-md-4 p-0" href="#">
+                          <a class="col-6 col-md-4 p-0"   href="{% url 'report:sales_summary_page'%}">
                             <div class="quick-actions-item">
                               <div
                                 class="avatar-item bg-primary rounded-circle"
                               >
-                                <i class="fas fa-file-invoice-dollar"></i>
+                                <i class="fas fa-chart-line"></i>
                               </div>
-                              <span class="text">Invoice</span>
+                              <span class="text">end of day</span>
                             </div>
                           </a>
-                          <a class="col-6 col-md-4 p-0" href="#">
+                          <a class="col-6 col-md-4 p-0" href="{% url 'settings:edit_settings'%}">
                             <div class="quick-actions-item">
                               <div
                                 class="avatar-item bg-secondary rounded-circle"
                               >
-                                <i class="fas fa-credit-card"></i>
+                                <i class="fas  fa-cog"></i>
                               </div>
-                              <span class="text">Payments</span>
+                              <span class="text">settings</span>
                             </div>
                           </a>
                         </div>
@@ -865,6 +907,9 @@ input[type=number] {
       
     </style>
     <!--   Core JS Files   -->
+    <script src="{% static 'assets/js/plugin/chart.js/chart.min.js' %}"></script>
+    <script src="{% static 'assets/js/plugin/chart.js/chart.min.js'%}"></script>
+
     <script src="{% static 'assets/js/core/popper.min.js' %}"></script>
     <script src="{% static 'assets/js/core/bootstrap.min.js' %}"></script>
 
@@ -874,7 +919,6 @@ input[type=number] {
 
 
     <!-- Chart JS -->
-    <script src="{% static 'assets/js/plugin/chart.js/chart.min.js' %}"></script>
 
     <!-- jQuery Sparkline -->
     <script src="{% static 'assets/js/plugin/select2/select2.full.min.js' %}"></script>
