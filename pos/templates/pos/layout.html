@@ -183,13 +183,18 @@
                 <div class="collapse" id="charts" style="">
                   <ul class="nav nav-collapse">
                     <li>
-                      <a href="{% url 'report:sales_summary_page'%}">
+                      <a href="{% url 'report:product_report'%}">
                         <span class="sub-item">Sales report</span>
                       </a>
                     </li>
                     <li>
+                      <a href="{% url 'report:sales_summary_page'%}">
+                        <span class="sub-item">Sales Analytics</span>
+                      </a>
+                    </li>
+                    <li>
                       <a href="{% url 'report:analytics'%}">
-                        <span class="sub-item">Analytics</span>
+                        <span class="sub-item">Inventory Analytics</span>
                       </a>
                     </li>
                   </ul>
